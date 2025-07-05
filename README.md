@@ -1,8 +1,15 @@
 # greenhouse_MakerSpace
 Simple project for managing DIY greenhouse via ESP8266 and RaspberryPi
 
+# Description
+There are two versions of this program:
+- ESP8266_grennhouse.ino is a simple program to run on greenhouse, but all the sensors are hardcoded and any addition, change or subtraction of sensors is limited and requires rewriting whole code
+- extended_ESP8266_greenhouse.ino has the same functionality as above program, but it futures config file that allows to manage amount and type of sensors/devices without rewriting the main code
+
+**The extended_ESP8266_greenhouse.ino code has not been yet tested due to lack of SD card to handle config file.**
+
 # TO DO
-1. For now there is no config file, as board NodeMCU v3 I am using now doesn't support external memory like SD card. After getting board that supports the SD card the .json file will be put into use.
+1. Test the extended code with suitable board that supports SD cards
 2. Add calibration of soil sensor to the code and convert it into percents.
 
 # What's wrong, what's good?
