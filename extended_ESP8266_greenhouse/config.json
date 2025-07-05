@@ -1,0 +1,40 @@
+[
+  {
+    "name": "air_temp",
+    "type": "value",
+    "driver": "DHT22",
+    "pin": 2,
+    "minValue": -10,
+    "maxValue": 60,
+    "flowerzoneId": 0,
+    "flowerId": 0
+  },
+  {
+    "name": "air_humidity",
+    "type": "value",
+    "driver": "DHT22",
+    "pin": 2,
+    "minValue": 0,
+    "maxValue": 100,
+    "flowerzoneId": 0,
+    "flowerId": 0
+  },
+  {
+    "name": "soil_moisture",
+    "type": "value",
+    "driver": "analog",
+    "pin": 0,
+    "minValue": 0,
+    "maxValue": 1023,
+    "flowerzoneId": 2,
+    "flowerId": 0
+  },
+  {
+    "name": "mister_valve",
+    "type": "toggle",
+    "driver": "digital",
+    "pin": 4,
+    "flowerzoneId": 1,
+    "flowerId": 3
+  }
+]
