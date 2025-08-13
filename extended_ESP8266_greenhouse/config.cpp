@@ -1,4 +1,5 @@
 #include "config.h"
+#include "sensor_types.h"
 #include <LittleFS.h>
 
 void loadConfig() {
@@ -37,7 +38,7 @@ void loadConfig() {
   for (JsonObject obj : arr) {
     DeviceConfig dev;
     dev.name         = obj["name"].as<String>();
-    dev.driver       = obj["driver"].as<String>();
+    dev.driver       = dev.driverEnum = parseSensorDriver(obj["driver"].as<String>());
     dev.type         = obj["type"].as<String>();
     dev.pin          = obj["pin"].as<uint8_t>();
     dev.minValue     = obj.containsKey("minValue") ? obj["minValue"].as<float>() : NAN;
