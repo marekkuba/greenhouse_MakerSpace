@@ -4,10 +4,12 @@
 #include "persistence.h"
 #include "mqtt.h"
 #include "network.h"
+#include "sensors_if.h"
+
+SensorManager Sensors;
 NetworkConfig netConfig;
 Greenhouse greenhouse;
 std::vector<ParamBinding> bindings;
-std::map<uint8_t, DHTReading> dhtCache;
 std::vector<DeviceConfig> devices;
 // Provide a default no-op. Will be overridden in loadTargets() if file exists.
 

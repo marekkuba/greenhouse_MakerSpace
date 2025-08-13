@@ -1,84 +1,73 @@
 #include "config.h"
 #include "sensor_types.h"
+#include "sensors_if.h"
+#include "device_types.h"
 #include <LittleFS.h>
+#include <ArduinoJson.h>
 
 void loadConfig() {
-  if (!LittleFS.begin()) {
-    Serial.println("[ERROR] LittleFS mount failed");
-    return;
-  }
+    if (!LittleFS.begin()) {
+        Serial.println(F("[ERROR] LittleFS mount failed"));
+        return;
+    }
+    if (!LittleFS.exists("/config.json")) {
+        Serial.println(F("[ERROR] /config.json not found"));
+        return;
+    }
 
-  if (!LittleFS.exists("/config.json")) {
-    Serial.println("[ERROR] config.json not found");
-    return;
-  }
+    File f = LittleFS.open("/config.json", "r");
+    if (!f) {
+        Serial.println(F("[ERROR] Failed to open config.json"));
+        return;
+    }
 
-  File f = LittleFS.open("/config.json", "r");
-  if (!f) {
-    Serial.println("[ERROR] Failed to open config.json");
-    return;
-  }
+    // Read whole file into buffer
+    size_t size = f.size();
+    std::unique_ptr<char[]> buf(new char[size]);
+    f.readBytes(buf.get(), size);
+    f.close();
 
-  size_t size = f.size();
-  // Dynamiczny bufor zamiast unique_ptr
-  char* buf = new char[size];
-  f.readBytes(buf, size);
-  f.close();
+    // Parse JSON
+    StaticJsonDocument<2048> doc;
+    auto err = deserializeJson(doc, buf.get(), size);
+    if (err) {
+        Serial.printf("[ERROR] Config parse failed: %s\n", err.c_str());
+        return;
+    }
 
-  StaticJsonDocument<2048> doc;
-  auto err = deserializeJson(doc, buf, size);
-  delete[] buf;  // Zwolnienie pamięci
+    devices.clear();
 
-  if (err) {
-    Serial.printf("[ERROR] Config parse failed: %s\n", err.c_str());
-    return;
-  }
+    for (JsonObject obj : doc.as<JsonArray>()) {
+        DeviceConfig dev;
+        dev.name         = obj["name"]        | "";
+        dev.driver       = parseSensorDriver(obj["driver"].as<String>());
+        dev.type         = parseDeviceType(obj["type"].as<String>());
+        dev.pin          = obj["pin"]         | 0;
+        dev.minValue     = obj.containsKey("minValue")    ? obj["minValue"].as<float>()  : NAN;
+        dev.maxValue     = obj.containsKey("maxValue")    ? obj["maxValue"].as<float>()  : NAN;
+        dev.flowerzoneId = obj["flowerzoneId"]| 0;
+        dev.flowerId     = obj["flowerId"]    | 0;
 
-  JsonArray arr = doc.as<JsonArray>();
-  for (JsonObject obj : arr) {
-    DeviceConfig dev;
-    dev.name         = obj["name"].as<String>();
-    dev.driver       = dev.driverEnum = parseSensorDriver(obj["driver"].as<String>());
-    dev.type         = obj["type"].as<String>();
-    dev.pin          = obj["pin"].as<uint8_t>();
-    dev.minValue     = obj.containsKey("minValue") ? obj["minValue"].as<float>() : NAN;
-    dev.maxValue     = obj.containsKey("maxValue") ? obj["maxValue"].as<float>() : NAN;
-    dev.flowerzoneId = obj["flowerzoneId"].as<uint8_t>();
-    dev.flowerId     = obj["flowerId"].as<uint8_t>();
-    dev.dhtPtr       = nullptr;
-
-    if (dev.driver == "DHT22") {
-      // Sprawdź czy sensor już istnieje dla tego pinu
-      bool sensorExists = false;
-      for (auto &d : devices) {
-        if (d.driver == "DHT22" && d.pin == dev.pin && d.dhtPtr) {
-          dev.dhtPtr = d.dhtPtr;  // Użyj istniejącej instancji
-          sensorExists = true;
-          Serial.printf("[CONFIG] Reusing existing DHT22 on pin %d\n", dev.pin);
-          break;
+        // Initialise actuators immediately
+        if (dev.type == DeviceType::Toggle) {
+            pinMode(dev.pin, OUTPUT);
+            digitalWrite(dev.pin, LOW);
+            Serial.printf("[CONFIG] Initialised toggle actuator on pin %d\n", dev.pin);
         }
-      }
 
-      // Jeśli nie istnieje, utwórz nowy
-      if (!sensorExists) {
-        DHT* sensor = new DHT(dev.pin, DHT22);
-        sensor->begin();
-        dev.dhtPtr = sensor;
-        Serial.printf("[CONFIG] Initialized DHT22 on pin %d\n", dev.pin);
-      }
+        // Optional: pre-create sensors so they're ready before first controlTick()
+        if (dev.driver != SensorDriver::Unknown && dev.type == DeviceType::Value) {
+            float dummy;
+            Sensors.read(dev.driver, dev.pin, "", dummy); // blank paramName if single output
+            Serial.printf("[CONFIG] Pre-initialised %s sensor on pin %d\n",
+                          String(driverName(dev.driver)).c_str(), dev.pin);
+        }
+
+        devices.push_back(dev);
     }
 
-    if (dev.type == "toggle") {
-      pinMode(dev.pin, OUTPUT);
-      digitalWrite(dev.pin, LOW);
-      Serial.printf("[CONFIG] Initialized toggle on pin %d\n", dev.pin);
-    }
-
-    devices.push_back(dev);
-  }
-  Serial.printf("[CONFIG] Loaded %d devices\n", (int)devices.size());
+    Serial.printf("[CONFIG] Loaded %d devices from config.json\n", (int)devices.size());
 }
-
 
 void loadNetworkConfig() {
   if (!LittleFS.begin()) {

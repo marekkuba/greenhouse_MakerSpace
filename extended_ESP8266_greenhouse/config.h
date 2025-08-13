@@ -2,6 +2,8 @@
 #include <ESP8266WiFi.h>
 #include <Arduino.h>
 #include <DHT.h>
+#include "sensor_types.h"
+#include "device_types.h"
 
 struct NetworkConfig {
   String wifi_ssid;
@@ -15,14 +17,13 @@ void loadNetworkConfig();
 extern NetworkConfig netConfig;
 struct DeviceConfig {
   String   name;
-  String   driver;
-  String   type;
+  SensorDriver   driver;
+  DeviceType type;
   uint8_t  pin;
   float    minValue;
   float    maxValue;
   uint8_t  flowerzoneId;
   uint8_t  flowerId;
-  DHT*     dhtPtr;
 };
 
 extern std::vector<DeviceConfig> devices;

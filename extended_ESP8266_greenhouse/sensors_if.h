@@ -114,3 +114,4 @@ class SensorManager {
         }
         std::map<SensorKey, ISensor*> _sensors;
 };
+extern SensorManager Sensors;
