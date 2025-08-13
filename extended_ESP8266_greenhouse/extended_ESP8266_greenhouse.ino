@@ -14,32 +14,14 @@
 #include "network.h"
 #include "persistence.h"
 #include "sensors.h"
+#include "status.h"
+#include "scheduler.h"
+#include "mqtt_helpers.h"
 
 void loop() {
-  unsigned long now = millis();
-  
-  static unsigned long lastStatus = 0;
-  if (now - lastStatus > 5000) {
-    lastStatus = now;
-    Serial.printf("[STATUS] WiFi: %s, MQTT: %s\n", 
-                 WiFi.isConnected() ? "Connected" : "Disconnected",
-                 mqttClient.connected() ? "Connected" : "Disconnected");
-  }
-
-  if (now - previousMillis < PUBLISH_INTERVAL) {
-    delay(10);
-    return;
-  }
-  
-  previousMillis = now;
-
-  if (!mqttClient.connected()) {
-    Serial.println("[WARN] MQTT not connected, skipping publish");
-    if (WiFi.isConnected()) {
-      connectToMqtt();
-    }
-    return;
-  }
+    logStatusIfNeeded();
+    if (!timeToPublish()) return;
+    if (!ensureMqttConnected()) return;
     controlTick();
 }
 
