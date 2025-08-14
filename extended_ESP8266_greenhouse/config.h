@@ -11,6 +11,8 @@ struct NetworkConfig {
   IPAddress mqtt_host;
   uint16_t mqtt_port;
 };
+
+loadAllConfigs();
 void loadConfig();
 void loadNetworkConfig();
 
@@ -22,8 +24,6 @@ struct DeviceConfig {
   uint8_t  pin;
   float    minValue;
   float    maxValue;
-  uint8_t  flowerzoneId;
-  uint8_t  flowerId;
 };
 
 extern std::vector<DeviceConfig> devices;

@@ -20,23 +20,38 @@
 
 void loop() {
     logStatusIfNeeded();
-    if (!timeToPublish()) return;
+
+    // Always try to keep MQTT alive
     if (!ensureMqttConnected()) return;
+
+    // Always run control logic so actuators react ASAP
     controlTick();
+
+    // Only publish the model periodically
+    if (timeToPublish()) {
+        publishModel();
+    }
 }
 
+void initSerial() {
+    Serial.begin(115200);
+    delay(1000);
+}
+
+void bootMessage() {
+    Serial.println(F("\n\n[BOOT] Starting..."));
+}
 
 void setup() {
-  Serial.begin(115200);
-  delay(1000);
-  Serial.println("\n\n[BOOT] Starting...");
+  initSerial();
+  bootMessage();
   initFilesystem();
-  loadConfig();
-  loadNetworkConfig();
-  loadMappings();        // new
-  loadTargets();         // optional; will apply after first model load
+  loadAllConfigs();
+  tryOfflineModelRestore();
+
   registerWifiHandlers();
   registerMqttHandlers();
+
   Serial.println("[BOOT] Initialization complete");
   setupWifi();
 }

@@ -22,4 +22,5 @@ void applyPersistedTargetsToModel();
 bool saveModelRaw(const char* buf, size_t len);
 bool loadModelRaw(String& out);
 extern std::function<void(void)> applyPersistedTargetsToModel;
-bool initFilesystem()
+bool initFilesystem();
+void tryOfflineModelRestore();

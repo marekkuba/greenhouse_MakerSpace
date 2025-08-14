@@ -1,4 +1,5 @@
 #include "model.h"
+#include "mqtt.h"
 
 void deserializeParameter(const JsonObject& src, Parameter& dst) {
     dst.id = src["id"] | 0;
@@ -75,8 +76,54 @@ bool parseGreenhouseJson(const char* json, size_t len) {
 
   greenhouse = std::move(newGh);
   Serial.println("[MODEL] Greenhouse model updated from JSON");
-
-  applyPersistedTargetsToModel();
+    /// call only if greenhouse from server is not full model
+    //  applyPersistedTargetsToModel();
   saveTargets();
   return true;
+}
+
+void publishModel() {
+    StaticJsonDocument<4096> doc;
+
+    // Greenhouse-level parameters
+    JsonArray ghParams = doc.createNestedArray("greenhouse");
+    for (auto &p : greenhouse.parameters) {
+        JsonObject o = ghParams.createNestedObject();
+        o["id"]  = p.id;
+        o["name"] = p.name;
+        o["current"] = p.currentValue;
+        o["requested"] = p.requestedValue;
+    }
+
+    // Zones
+    JsonArray zones = doc.createNestedArray("zones");
+    for (auto &z : greenhouse.zones) {
+        JsonObject zj = zones.createNestedObject();
+        zj["id"] = z.id;
+        JsonArray zparams = zj.createNestedArray("parameters");
+        for (auto &p : z.parameters) {
+            JsonObject o = zparams.createNestedObject();
+            o["id"]  = p.id;
+            o["name"] = p.name;
+            o["current"] = p.currentValue;
+            o["requested"] = p.requestedValue;
+        }
+        JsonArray fps = zj.createNestedArray("flowerpots");
+        for (auto &fp : z.flowerpots) {
+            JsonObject fpj = fps.createNestedObject();
+            fpj["id"] = fp.id;
+            JsonArray fpparams = fpj.createNestedArray("parameters");
+            for (auto &p : fp.parameters) {
+                JsonObject o = fpparams.createNestedObject();
+                o["id"]  = p.id;
+                o["name"] = p.name;
+                o["current"] = p.currentValue;
+                o["requested"] = p.requestedValue;
+            }
+        }
+    }
+
+    String output;
+    serializeJson(doc, output);
+    mqttClient.publish("greenhouse/state", 1, true, output.c_str());
 }

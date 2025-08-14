@@ -4,6 +4,15 @@
 #include "device_types.h"
 #include <LittleFS.h>
 #include <ArduinoJson.h>
+#include "mappings.h"
+#include "persistence.h"
+
+void loadAllConfigs() {
+    loadConfig();
+    loadNetworkConfig();
+    loadMappings();
+    loadTargets(); // prepare applyPersistedTargetsToModel if offline
+}
 
 void loadConfig() {
     if (!LittleFS.begin()) {
@@ -45,8 +54,6 @@ void loadConfig() {
         dev.pin          = obj["pin"]         | 0;
         dev.minValue     = obj.containsKey("minValue")    ? obj["minValue"].as<float>()  : NAN;
         dev.maxValue     = obj.containsKey("maxValue")    ? obj["maxValue"].as<float>()  : NAN;
-        dev.flowerzoneId = obj["flowerzoneId"]| 0;
-        dev.flowerId     = obj["flowerId"]    | 0;
 
         // Initialise actuators immediately
         if (dev.type == DeviceType::Toggle) {

@@ -1,5 +1,16 @@
 #include "persistence.h"
 
+void tryOfflineModelRestore() {
+    String json;
+    if (loadModelRaw(json)) {
+        Serial.println(F("[BOOT] Loaded saved greenhouse model from /model.json"));
+        parseGreenhouseJson(json.c_str(), json.length());
+        applyPersistedTargetsToModel(); // safe here: no fresh server data yet
+    } else {
+        Serial.println(F("[BOOT] No saved model found, will wait for server"));
+    }
+}
+
 
 bool saveTargets() {
   StaticJsonDocument<4096> doc;
@@ -83,26 +94,54 @@ bool loadTargets() {
   applyFn = apply;
   haveApply = true;
 
-  // Expose an accessor to call once model is loaded
-  applyPersistedTargetsToModel = [](){
-    static bool done = false;
-    if (done) return;
-    done = true;
-    if (haveApply) applyFn();
-  };
+ applyPersistedTargetsToModel = [=](){
+     static bool done = false;
+     if (done) return;
+     done = true;
+     if (!haveApply) return;
+
+     auto applyIfMissing = [&](const TargetRec& r) {
+         Parameter* p = nullptr;
+         if (r.scope == Scope::Greenhouse) {
+             for (auto &param : greenhouse.parameters)
+                 if (param.id == r.paramId) p = &param;
+         } else if (r.scope == Scope::Zone) {
+             for (auto &z : greenhouse.zones)
+                 if (z.id == r.zoneId)
+                     for (auto &param : z.parameters)
+                         if (param.id == r.paramId) p = &param;
+         } else if (r.scope == Scope::Flowerpot) {
+             for (auto &z : greenhouse.zones)
+                 if (z.id == r.zoneId)
+                     for (auto &fp : z.flowerpots)
+                         if (fp.id == r.flowerpotId)
+                             for (auto &param : fp.parameters)
+                                 if (param.id == r.paramId) p = &param;
+         }
+         if (p && isnan(p->requestedValue)) {
+             p->requestedValue = r.requestedValue;
+         }
+     };
+
+     for (auto &rec : pendingTargets) {
+         applyIfMissing(rec);
+     }
+     Serial.println(F("[PERSIST] Applied persisted targets ONLY where missing"));
+ };
 
   return true;
 }
 
 bool saveModelRaw(const char* buf, size_t len) {
-File f=LittleFS.open("/model.json","w"); if(!f) return false;
-size_t w=f.write((const uint8_t*)buf, len); f.close(); return w==len;
+    File f=LittleFS.open("/model.json","w"); if(!f) return false;
+    size_t w=f.write((const uint8_t*)buf, len); f.close(); return w==len;
 }
 bool loadModelRaw(String& out) {
-if(!LittleFS.exists("/model.json")) return false;
-File f=LittleFS.open("/model.json","r"); if(!f) return false;
-out = f.readString(); f.close(); return out.length()>0;
+    if(!LittleFS.exists("/model.json")) return false;
+    File f=LittleFS.open("/model.json","r"); if(!f) return false;
+    out = f.readString(); f.close(); return out.length()>0;
 }
+
 bool initFilesystem() {
     if (!LittleFS.begin()) {
         Serial.println("[ERROR] Failed to mount LittleFS");
