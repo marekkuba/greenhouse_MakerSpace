@@ -1,0 +1,24 @@
+[
+  {
+    "scope": "zone",
+    "zoneId": 1,
+    "flowerpotId": 0,
+    "paramName": "temperature",
+    "readDriver": "DHT22",
+    "readPin": 2,
+    "writeDriver": "toggle",
+    "writePin": 5,
+    "control": "heat"
+  },
+  {
+    "scope": "zone",
+    "zoneId": 1,
+    "flowerpotId": 0,
+    "paramName": "humidity",
+    "readDriver": "DHT22",
+    "readPin": 2,
+    "writeDriver": "toggle",
+    "writePin": 12,
+    "control": "humidify"
+  }
+]
