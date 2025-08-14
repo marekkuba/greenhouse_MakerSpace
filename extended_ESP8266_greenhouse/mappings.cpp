@@ -42,10 +42,3 @@ Parameter* findParameter(const ParamBinding& b) {
   }
   return nullptr;
 }
-
-String makeParamTopic(const ParamBinding& b, const char* field) {
-    String t = "greenhouse";
-    t += "/" + scopeToString(b.scope);
-    t += "/" + b.paramName + "/" + field;
-    return t;
-}

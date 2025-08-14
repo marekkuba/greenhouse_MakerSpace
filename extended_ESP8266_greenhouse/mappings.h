@@ -23,4 +23,3 @@ struct ParamBinding {
 
 bool loadMappings();
 Parameter* findParameter(const ParamBinding& b);
-String makeParamTopic(const ParamBinding& b, const char* field /* "current" or "requested" */);
