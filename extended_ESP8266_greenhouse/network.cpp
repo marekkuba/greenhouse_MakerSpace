@@ -1,4 +1,5 @@
 #include "network.h"
+#include "mqtt.h"
 
 void setupWifi() {
   Serial.println("[WIFI] Connecting to Wi-Fi...");

@@ -125,5 +125,5 @@ void publishModel() {
 
     String output;
     serializeJson(doc, output);
-    mqttClient.publish("greenhouse/state", 1, true, output.c_str());
+    mqttClient.publish(greenhouse.ipAddress, 1, true, output.c_str());
 }

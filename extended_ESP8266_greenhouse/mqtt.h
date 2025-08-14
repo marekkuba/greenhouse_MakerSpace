@@ -10,7 +10,7 @@ void onMqttMessage(char* topic, char* payload,
                    AsyncMqttClientMessageProperties props,
                    size_t len, size_t idx, size_t total);
 String makeTopic(String greenhouseIpAddress);
-void registerMqttHandlers()
+void registerMqttHandlers();
 
 extern AsyncMqttClient mqttClient;
 

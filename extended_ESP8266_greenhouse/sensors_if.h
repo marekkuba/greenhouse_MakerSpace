@@ -67,10 +67,12 @@ class DHT22Sensor : public ISensor {
                 if (!isnan(h)) _hum = h;
                 _lastSample = now;
             }
-            if (paramName.indexOf("hum") >= 0)
-                out = _hum;
-            else
+            if (paramName.equalsIgnoreCase("humidity") ||
+                    paramName.equalsIgnoreCase("air_humidity")) {
+                    out = _hum;
+            } else {
                 out = _temp;
+            }
             _lastRead = now;
             return !isnan(out);
         }

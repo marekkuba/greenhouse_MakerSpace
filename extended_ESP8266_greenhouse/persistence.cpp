@@ -26,9 +26,9 @@ bool saveTargets() {
   };
 
   // greenhouse-level
-  for (auto &p : gh.parameters) addParam("greenhouse", 0, 0, p);
+  for (auto &p : greenhouse.parameters) addParam("greenhouse", 0, 0, p);
   // zones
-  for (auto &z : gh.zones) {
+  for (auto &z : greenhouse.zones) {
     for (auto &p : z.parameters) addParam("zone", z.id, 0, p);
     for (auto &fp : z.flowerpots) {
       for (auto &p : fp.parameters) addParam("flowerpot", z.id, fp.id, p);
@@ -74,12 +74,12 @@ bool loadTargets() {
   auto apply = [&]() {
     auto findAndApply = [&](const TargetRec& r) {
       if (r.scope == Scope::Greenhouse) {
-        for (auto &p : gh.parameters) if (p.id == r.paramId) p.requestedValue = r.requestedValue;
+        for (auto &p : greenhouse.parameters) if (p.id == r.paramId) p.requestedValue = r.requestedValue;
       } else if (r.scope == Scope::Zone) {
-        for (auto &z : gh.zones) if (z.id == r.zoneId)
+        for (auto &z : greenhouse.zones) if (z.id == r.zoneId)
           for (auto &p : z.parameters) if (p.id == r.paramId) p.requestedValue = r.requestedValue;
       } else if (r.scope == Scope::Flowerpot) {
-        for (auto &z : gh.zones) if (z.id == r.zoneId)
+        for (auto &z : greenhouse.zones) if (z.id == r.zoneId)
           for (auto &fp : z.flowerpots) if (fp.id == r.flowerpotId)
             for (auto &p : fp.parameters) if (p.id == r.paramId) p.requestedValue = r.requestedValue;
       }

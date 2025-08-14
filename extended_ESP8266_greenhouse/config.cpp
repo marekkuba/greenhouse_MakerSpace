@@ -15,10 +15,6 @@ void loadAllConfigs() {
 }
 
 void loadConfig() {
-    if (!LittleFS.begin()) {
-        Serial.println(F("[ERROR] LittleFS mount failed"));
-        return;
-    }
     if (!LittleFS.exists("/config.json")) {
         Serial.println(F("[ERROR] /config.json not found"));
         return;
@@ -77,15 +73,10 @@ void loadConfig() {
 }
 
 void loadNetworkConfig() {
-  if (!LittleFS.begin()) {
-    Serial.println("[ERROR] LittleFS mount failed\n");
-    return;
-  }
-
   auto filename = "/network_config.json";
 
   if (!LittleFS.exists(filename)) {
-    Serial.println("[ERROR] %s not found\n", filename);
+    Serial.printf("[ERROR] %s not found\n", filename);
     return;
   }
 
@@ -109,7 +100,6 @@ void loadNetworkConfig() {
     return;
   }
 
-  JsonArray arr = doc.as<JsonArray>();
   netConfig.wifi_ssid = doc["wifi_ssid"].as<String>();
   netConfig.wifi_password = doc["wifi_password"].as<String>();
   String mqttHostStr = doc["mqtt_host"].as<String>();

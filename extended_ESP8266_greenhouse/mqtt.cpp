@@ -7,11 +7,9 @@ String makeTopic(String greenhouseIpAddress) {
 }
 
 void connectToMqtt() {
-  Serial.println("[MQTT] Attempting connection...");
-  Serial.printf("[MQTT] Broker: %d.%d.%d.%d:%d\n",
-                netConfig.mqtt_host[0], netConfig.mqtt_host[1], netConfig.mqtt_host[2], netConfig.mqtt_host[3],
-                MQTT_PORT);
-  mqttClient.connect();
+    Serial.println("[MQTT] Attempting connection...");
+    Serial.printf("[MQTT] Broker: %d.%d.%d.%d:%d\n", netConfig.mqtt_host, netConfig.mqtt_host,netConfig.mqtt_host, netConfig.mqtt_host,netConfig.mqtt_port);
+    mqttClient.connect();
 }
 
 void onMqttConnect(bool sessionPresent) {
@@ -44,7 +42,7 @@ void onMqttMessage(char* topic, char* payload,
 
   Serial.printf("[MQTT] Message received: [%s] %s\n", t.c_str(), msg.c_str());
 
-  if (t == greenhouse.ipAddress) {
+  if (t == makeTopic(greenhouse.ipAddress)) {
     bool ok = parseGreenhouseJson(msg.c_str(), msg.length());
     Serial.printf("[MODEL] Parse %s\n", ok ? "OK" : "FAIL");
     return;
@@ -55,6 +53,6 @@ void registerMqttHandlers() {
     mqttClient.onDisconnect(onMqttDisconnect);
     mqttClient.onPublish(onMqttPublish);
     mqttClient.onMessage(onMqttMessage);
-    mqttClient.setServer(MQTT_HOST, MQTT_PORT);
+    mqttClient.setServer(netConfig.mqtt_host, netConfig.mqtt_port);
     mqttClient.setKeepAlive(60);
 }

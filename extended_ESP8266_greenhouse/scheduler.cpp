@@ -3,10 +3,9 @@
 
 bool timeToPublish() {
     unsigned long now = millis();
-    if (now - previousMillis < PUBLISH_INTERVAL) {
-        delay(10);
-        return false;
+    if (now - previousMillis >= PUBLISH_INTERVAL) {
+        previousMillis = now;
+        return true;
     }
-    previousMillis = now;
-    return true;
+    return false;
 }

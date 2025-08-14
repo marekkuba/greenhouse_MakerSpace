@@ -12,7 +12,7 @@ struct NetworkConfig {
   uint16_t mqtt_port;
 };
 
-loadAllConfigs();
+void loadAllConfigs();
 void loadConfig();
 void loadNetworkConfig();
 
