@@ -21,8 +21,20 @@ bool loadMappings() {
     b.readPin = o["readPin"] | 0;
     b.writeDriver = parseSensorDriver(o["writeDriver"].as<String>());
     b.writePin = o["writePin"] | 0;
-    b.control = o["control"] | "";
-
+    b.direction   = parseDirection(o["direction"].as<String>());
+    b.hysteresis  = o["hysteresis"] | 0.5;
+    b.activeLow   = o["activeLow"]  | false;
+    b.minOnMs     = o["minOnMs"]    | 0;
+    b.minOffMs    = o["minOffMs"]   | 0;
+    b.outputMode  = parseOutputMode(o["outputMode"] | "binary");
+    if (b.direction == Direction::Unknown) {
+      Serial.printf("[MAP] Warning: unknown direction for %s; defaulting to increase\n", b.paramName.c_str());
+      b.direction = Direction::Increase;
+    }
+    if (b.outputMode == OutputMode::Unknown) {
+      Serial.printf("[MAP] Warning: unknown outputMode for %s; defaulting to binary\n", b.paramName.c_str());
+      b.outputMode = OutputMode::Binary;
+    }
     bindings.push_back(b);
   }
   Serial.printf("[MAP] Loaded %d bindings\n", (int)bindings.size());

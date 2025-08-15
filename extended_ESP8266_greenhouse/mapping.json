@@ -1,24 +1,44 @@
 [
   {
     "scope": "zone",
-    "zoneId": 1,
+    "zoneId": 2,
     "flowerpotId": 0,
     "paramName": "temperature",
+    "direction": "increase",
+    "hysteresis": 0.5,
+    "outputMode": "binary",
     "readDriver": "DHT22",
     "readPin": 2,
-    "writeDriver": "toggle",
+    "writeDriver": "digital",
     "writePin": 5,
-    "control": "heat"
+    "activeLow": false,
+    "minOnMs": 30000,
+    "minOffMs": 30000
   },
   {
     "scope": "zone",
-    "zoneId": 1,
+    "zoneId": 2,
     "flowerpotId": 0,
-    "paramName": "humidity",
+    "paramName": "temperature",
+    "direction": "decrease",
+    "hysteresis": 0.5,
+    "outputMode": "binary",
     "readDriver": "DHT22",
     "readPin": 2,
-    "writeDriver": "toggle",
-    "writePin": 12,
-    "control": "humidify"
+    "writeDriver": "digital",
+    "writePin": 6
+  },
+  {
+    "scope": "zone",
+    "zoneId": 2,
+    "flowerpotId": 0,
+    "paramName": "humidity",
+    "direction": "increase",
+    "hysteresis": 2.0,
+    "outputMode": "binary",
+    "readDriver": "DHT22",
+    "readPin": 2,
+    "writeDriver": "digital",
+    "writePin": 12
   }
 ]
