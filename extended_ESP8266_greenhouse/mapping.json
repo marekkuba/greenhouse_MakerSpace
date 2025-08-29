@@ -20,5 +20,17 @@
     "writeDriver": "toggle",
     "writePin": 12,
     "control": "humidify"
+  },
+  {
+    "scope": "zone",
+    "zoneId": 1,
+    "paramName": "soil_moisture",
+    "readDriver": "muxAnalog",
+    "readPin": 0,
+    "muxChannel": 3,
+    "muxSelPins": [12, 13, 14],
+    "writeDriver": "toggle",
+    "writePin": 12,
+    "control": "humidify"
   }
 ]

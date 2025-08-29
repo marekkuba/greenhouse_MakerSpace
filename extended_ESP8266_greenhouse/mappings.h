@@ -14,7 +14,8 @@ struct ParamBinding {
 
     SensorDriver readDriver;
     uint8_t      readPin = 0;
-
+    uint8_t muxChannel = 0;
+    std::vector<uint8_t> muxSelPins;
     SensorDriver writeDriver;
     uint8_t      writePin = 0;
 
