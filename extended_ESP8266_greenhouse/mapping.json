@@ -47,8 +47,6 @@
     "readPin": 0,
     "muxChannel": 3,
     "muxSelPins": [12, 13, 14],
-    "writeDriver": "toggle",
-    "writePin": 12,
     "writeDriver": "digital",
     "writePin": 12
   }
