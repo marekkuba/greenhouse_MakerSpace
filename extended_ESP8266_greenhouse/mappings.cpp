@@ -19,6 +19,13 @@ bool loadMappings() {
     b.paramName = o["paramName"] | "";
     b.readDriver = parseSensorDriver(o["readDriver"].as<String>());
     b.readPin = o["readPin"] | 0;
+    b.muxChannel = o["muxChannel"] | 0;
+    if (o.containsKey("muxSelPins")) {
+        b.muxSelPins.clear();
+        for (JsonVariant v : o["muxSelPins"].as<JsonArray>()) {
+            b.muxSelPins.push_back(v.as<uint8_t>());
+        }
+    }
     b.writeDriver = parseSensorDriver(o["writeDriver"].as<String>());
     b.writePin = o["writePin"] | 0;
     b.direction   = parseDirection(o["direction"].as<String>());

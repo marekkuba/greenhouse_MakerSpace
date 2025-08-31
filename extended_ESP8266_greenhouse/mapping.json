@@ -1,15 +1,12 @@
 [
   {
     "scope": "zone",
-    "zoneId": 2,
+    "zoneId": 1,
     "flowerpotId": 0,
     "paramName": "temperature",
-    "direction": "increase",
-    "hysteresis": 0.5,
-    "outputMode": "binary",
     "readDriver": "DHT22",
     "readPin": 2,
-    "writeDriver": "digital",
+    "writeDriver": "toggle",
     "writePin": 5,
     "activeLow": false,
     "minOnMs": 30000,
@@ -38,6 +35,18 @@
     "outputMode": "binary",
     "readDriver": "DHT22",
     "readPin": 2,
+    "writeDriver": "toggle",
+    "writePin": 12,
+    "control": "humidify"
+  },
+  {
+    "scope": "zone",
+    "zoneId": 1,
+    "paramName": "soil_moisture",
+    "readDriver": "muxAnalog",
+    "readPin": 0,
+    "muxChannel": 3,
+    "muxSelPins": [12, 13, 14],
     "writeDriver": "digital",
     "writePin": 12
   }
