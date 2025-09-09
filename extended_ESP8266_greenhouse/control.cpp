@@ -1,6 +1,6 @@
 #include "control.h"
 #include "config.h"
-#include "sensors.h"
+#include "sensors_if.h"
 #include "mappings.h"
 #include "actuators.h"
 #include "model.h"

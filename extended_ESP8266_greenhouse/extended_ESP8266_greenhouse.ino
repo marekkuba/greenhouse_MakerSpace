@@ -13,7 +13,6 @@
 #include "mqtt.h"
 #include "network.h"
 #include "persistence.h"
-#include "sensors.h"
 #include "status.h"
 #include "scheduler.h"
 #include "mqtt_helpers.h"
