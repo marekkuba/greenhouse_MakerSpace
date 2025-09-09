@@ -5,6 +5,7 @@ enum class SensorDriver : uint8_t {
     Analog,
     Digital,
     DHT22,
+    MuxAnalog,
     Unknown
 };
 
