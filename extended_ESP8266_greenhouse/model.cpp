@@ -1,5 +1,8 @@
 #include "model.h"
 #include "mqtt.h"
+#include "persistence.h"
+#include <Arduino.h>
+#include <WString.h>
 
 void deserializeParameter(const JsonObject& src, Parameter& dst) {
     dst.id = src["id"] | 0;
@@ -125,5 +128,5 @@ void publishModel() {
 
     String output;
     serializeJson(doc, output);
-    mqttClient.publish(greenhouse.ipAddress, 1, true, output.c_str());
+    mqttClient.publish(greenhouse.ipAddress.c_str(), 1, true, output.c_str());
 }

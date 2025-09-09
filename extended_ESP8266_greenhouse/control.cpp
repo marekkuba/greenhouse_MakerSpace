@@ -5,6 +5,7 @@
 #include "actuators.h"
 #include "model.h"
 #include "mqtt.h"
+#include "globals.h"
 
 namespace {
     struct ActState {
@@ -25,7 +26,7 @@ void controlTick() {
 
         // 1. Read sensor → update model
         float val = NAN;
-        if Sensors.read(b.readDriver, b.readPin, p->name, val, b.muxChannel, b.muxSelPins) {
+        if (Sensors.read(b.readDriver, b.readPin, p->name, val, b.muxChannel, b.muxSelPins)) {
             p->currentValue = val; // model is up to date
         }
 

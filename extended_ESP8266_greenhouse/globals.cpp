@@ -5,6 +5,7 @@
 #include "mqtt.h"
 #include "network.h"
 #include "sensors_if.h"
+#include <Ticker.h>
 
 SensorManager Sensors;
 NetworkConfig netConfig;

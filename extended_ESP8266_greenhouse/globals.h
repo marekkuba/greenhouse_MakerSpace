@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <functional>
+#include <Arduino.h>
+#include <Ticker.h>
 
 // Forward includes for the types these globals use.
 // Adjust these includes if the types live elsewhere.
@@ -32,7 +34,7 @@ extern Ticker wifiReconnectTimer;                            // defined in globa
 extern Ticker mqttReconnectTimer;                            // defined in globals.cpp [web:2][web:21]
 
 // Timing
-extern const unsigned long PUBLISH_INTERVAL;                 // defined in globals.cpp [web:2][web:22]
+static const unsigned long PUBLISH_INTERVAL = 10000;                 // defined in globals.cpp [web:2][web:22]
 extern unsigned long previousMillis;                         // defined in globals.cpp [web:2][web:22]
 
 #endif // GLOBALS_H

@@ -5,6 +5,8 @@
 #include <vector>
 #include "model.h"
 #include "sensor_types.h"
+#include "persistence.h"
+
 
 enum class OutputMode : uint8_t {
     Binary = 0, // on/off

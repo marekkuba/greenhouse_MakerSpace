@@ -13,6 +13,7 @@ struct Parameter {
   float max = NAN;
   String unit;
   String parameterType;
+  bool actuatorState = false; 
 };
 
 struct Flowerpot {
@@ -39,6 +40,10 @@ struct Greenhouse {
 };
 
 void deserializeParameter(const JsonObject& src, Parameter& dst);
-bool parseGreenhouseJson(const char* json, size_t len, Greenhouse& out);
+bool parseGreenhouseJson(const char* json, size_t len);
+
+
+// chat kazał dodac
+void publishModel();
 
 extern Greenhouse greenhouse;

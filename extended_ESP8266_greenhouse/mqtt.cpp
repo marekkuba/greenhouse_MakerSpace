@@ -1,6 +1,7 @@
 #include "mqtt.h"
 #include "config.h"
 #include "model.h"
+#include "globals.h"
 
 String makeTopic(String greenhouseIpAddress) {
   return "greenhouse/"+greenhouseIpAddress;
@@ -14,7 +15,7 @@ void connectToMqtt() {
 
 void onMqttConnect(bool sessionPresent) {
   Serial.printf("[MQTT] Connected! Session: %d\n", sessionPresent);
-  mqttClient.subscribe(makeTopic(greenhouse.ipAddress), 1);
+  mqttClient.subscribe(makeTopic(greenhouse.ipAddress).c_str(), 1);
   Serial.println("[MQTT] Subscriptions set");
 }
 

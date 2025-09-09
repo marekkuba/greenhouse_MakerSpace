@@ -82,7 +82,7 @@ void loadNetworkConfig() {
 
   File f = LittleFS.open(filename, "r");
   if (!f) {
-    Serial.println("[ERROR] Failed to open %s\n", filename);
+    Serial.printf("[ERROR] Failed to open %s\n", filename);
     return;
   }
 

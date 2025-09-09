@@ -18,7 +18,6 @@ inline Scope codeToScope(uint8_t code) {
 struct TargetRec { Scope scope; uint32_t zoneId; uint32_t flowerpotId; uint32_t paramId; float requestedValue; };
 bool saveTargets();
 bool loadTargets();
-void applyPersistedTargetsToModel();
 bool saveModelRaw(const char* buf, size_t len);
 bool loadModelRaw(String& out);
 extern std::function<void(void)> applyPersistedTargetsToModel;

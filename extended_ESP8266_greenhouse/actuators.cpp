@@ -1,6 +1,5 @@
 #include "actuators.h"
 #include <Arduino.h>
-#include "actuators.h"
 #include "sensor_types.h"
 
 void writeActuator(SensorDriver driver, uint8_t pin, bool level) {

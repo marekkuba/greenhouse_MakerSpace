@@ -1,5 +1,18 @@
 #include "mappings.h"
 #include "sensor_types.h"
+#include "globals.h"
+
+
+
+// Chat kazal dodac by ogarnac blad 'strinfToScope' was not declared in this scope
+Scope stringToScope(const String& text);
+
+Scope stringToScope(const String& text) {
+    if (text.equalsIgnoreCase("greenhouse")) return Scope::Greenhouse;
+    if (text.equalsIgnoreCase("zone")) return Scope::Zone;
+    if (text.equalsIgnoreCase("flowerpot")) return Scope::Flowerpot;
+    return Scope::Greenhouse; // Default
+}
 
 bool loadMappings() {
   if (!LittleFS.exists("/mapping.json")) { Serial.println("[MAP] /mapping.json not found"); return false; }

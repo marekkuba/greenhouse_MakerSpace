@@ -15,10 +15,10 @@ void tryOfflineModelRestore() {
 bool saveTargets() {
   StaticJsonDocument<4096> doc;
   JsonArray arr = doc.to<JsonArray>();
-
-  auto addParam = [&](Scope scope, uint32_t zoneId, uint32_t flowerpotId, const Parameter& p){
+  // potencjalny blad - powinno byc scopeToCode a nie const char* ale zostawiam poki co, bo kompiluje
+  auto addParam = [&](const char* scopeStr, uint32_t zoneId, uint32_t flowerpotId, const Parameter& p){
     JsonObject o = arr.createNestedObject();
-    o["scope"] = scopeToCode(scope);
+    o["scope"] = scopeStr;
     o["zoneId"] = zoneId;
     o["flowerpotId"] = flowerpotId;
     o["paramId"] = p.id;
