@@ -1,32 +1,43 @@
 [
   {
-    "name": "air_temp",
+    "name": "temperature",
     "type": "value",
     "driver": "DHT22",
-    "pin": 2,
-    "minValue": -10,
-    "maxValue": 60
+    "pin": 12,
+    "minValue": -40,
+    "maxValue": 80
   },
   {
-    "name": "air_humidity",
+    "name": "humidity",
     "type": "value",
     "driver": "DHT22",
-    "pin": 2,
+    "pin": 12,
     "minValue": 0,
     "maxValue": 100
   },
   {
-    "name": "soil_moisture",
-    "type": "value",
-    "driver": "analog",
-    "pin": 0,
-    "minValue": 0,
-    "maxValue": 1023
-  },
-  {
-    "name": "mister_valve",
+    "name": "humidity",
     "type": "toggle",
     "driver": "digital",
-    "pin": 4
+    "pin": 2,
+    "minValue": 0,
+    "maxValue": 1
+  },
+  {
+    "name": "light",
+    "type": "toggle",
+    "driver": "digital",
+    "pin": 16,
+    "minValue": 0,
+    "maxValue": 1
+  },
+  {
+    "name": "temperature",
+    "type": "toggle",
+    "driver": "digital",
+    "pin": 0,
+    "minValue": 0,
+    "maxValue": 1
   }
+
 ]
