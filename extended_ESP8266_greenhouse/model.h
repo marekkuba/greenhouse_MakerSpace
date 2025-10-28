@@ -43,7 +43,6 @@ void deserializeParameter(const JsonObject& src, Parameter& dst);
 bool parseGreenhouseJson(const char* json, size_t len);
 
 
-// chat kazał dodac
 void publishModel();
 
 extern Greenhouse greenhouse;

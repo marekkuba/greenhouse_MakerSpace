@@ -1,6 +1,0 @@
-{
-  "wifi_ssid": "FUW.makerspace",
-  "wifi_password": "Pi=3,14159",
-  "mqtt_host": "10.85.52.52",
-  "mqtt_port": 1883
-}

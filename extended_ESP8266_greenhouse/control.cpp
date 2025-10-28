@@ -21,26 +21,37 @@ namespace {
 
 void controlTick() {
     for (auto &b : bindings) {
+      Serial.printf("[MAP] Binding: z:%u fp:%u name=%s \n",
+                    b.zoneId, b.flowerpotId, b.paramName.c_str());
         Parameter* p = findParameter(b);
-        if (!p) continue;
 
+        if (!p) continue;
+      Serial.printf("[MAP] Parameter: name:%s \n",
+                    p->name.c_str());
         // 1. Read sensor → update model
         float val = NAN;
-        if (Sensors.read(b.readDriver, b.readPin, p->name, val, b.muxChannel, b.muxSelPins)) {
-            p->currentValue = val; // model is up to date
+        if(b.readPin != -1){
+            if (Sensors.read(b.readDriver, b.readPin, p->name, val, b.muxChannel, b.muxSelPins)) {
+                p->currentValue = val;
+                 // model is up to date
+                 Serial.printf("[MAP] Current value updated: %.2f \n",
+                                     p->currentValue);
+            }
         }
-
         // 2. Control logic
+  Serial.printf("Debug -1\n");
   if (!(p->mutableFlag && !isnan(p->requestedValue) && !isnan(p->currentValue))) continue;
-
+  Serial.printf("Debug 0\n");
   const float err = p->requestedValue - p->currentValue;
   const float h   = b.hysteresis;
+  Serial.printf("Debug 1\n");
   const uint16_t key = actKey(b.writeDriver, b.writePin);
   auto &st = gAct[key];
   const uint32_t now = millis();
 
   if (b.outputMode == OutputMode::Binary) {
     bool wantOn = st.on; // hold inside deadband
+    Serial.printf("Debug 2\n");
     if (b.direction == Direction::Increase) {
         if (err >  h)      wantOn = true;
             else if (err < -h) wantOn = false;

@@ -26,15 +26,9 @@ void loadConfig() {
         return;
     }
 
-    // Read whole file into buffer
-    size_t size = f.size();
-    std::unique_ptr<char[]> buf(new char[size]);
-    f.readBytes(buf.get(), size);
+    JsonDocument doc;
+    DeserializationError err = deserializeJson(doc, f);
     f.close();
-
-    // Parse JSON
-    StaticJsonDocument<2048> doc;
-    auto err = deserializeJson(doc, buf.get(), size);
     if (err) {
         Serial.printf("[ERROR] Config parse failed: %s\n", err.c_str());
         return;
@@ -43,6 +37,7 @@ void loadConfig() {
     devices.clear();
 
     for (JsonObject obj : doc.as<JsonArray>()) {
+
         DeviceConfig dev;
         dev.name         = obj["name"]        | "";
         dev.driver       = parseSensorDriver(obj["driver"].as<String>());
@@ -50,63 +45,43 @@ void loadConfig() {
         dev.pin          = obj["pin"]         | 0;
         dev.minValue     = obj.containsKey("minValue")    ? obj["minValue"].as<float>()  : NAN;
         dev.maxValue     = obj.containsKey("maxValue")    ? obj["maxValue"].as<float>()  : NAN;
+        Serial.printf("[CONFIG] Loaded %s\n", dev.name);
 
         // Initialise actuators immediately
-        if (dev.type == DeviceType::Toggle) {
-            pinMode(dev.pin, OUTPUT);
-            digitalWrite(dev.pin, LOW);
-            Serial.printf("[CONFIG] Initialised toggle actuator on pin %d\n", dev.pin);
-        }
-
-        // Optional: pre-create sensors so they're ready before first controlTick()
-        if (dev.driver != SensorDriver::Unknown && dev.type == DeviceType::Value) {
-            float dummy;
-            Sensors.read(dev.driver, dev.pin, "", dummy); // blank paramName if single output
-            Serial.printf("[CONFIG] Pre-initialised %s sensor on pin %d\n",
-                          String(driverName(dev.driver)).c_str(), dev.pin);
-        }
-
-        devices.push_back(dev);
+         if (dev.driver != SensorDriver::Unknown && dev.type == DeviceType::Value) {
+             float dummy;
+             Sensors.read(dev.driver, dev.pin, "", dummy);
+             Serial.printf("[CONFIG] Pre-initialised %s sensor on pin %u\n",
+                           String(driverName(dev.driver)).c_str(), dev.pin);
+         }
+         devices.push_back(dev);
     }
 
     Serial.printf("[CONFIG] Loaded %d devices from config.json\n", (int)devices.size());
 }
-
 void loadNetworkConfig() {
-  auto filename = "/network_config.json";
+  const char* filename = "/network_config.json";
+  if (!LittleFS.exists(filename)) { Serial.printf("[ERROR] %s not found\n", filename); return; }
+  File f = LittleFS.open(filename, "r"); if (!f) { Serial.printf("[ERROR] Failed to open %s\n", filename); return; }
 
-  if (!LittleFS.exists(filename)) {
-    Serial.printf("[ERROR] %s not found\n", filename);
-    return;
-  }
-
-  File f = LittleFS.open(filename, "r");
-  if (!f) {
-    Serial.printf("[ERROR] Failed to open %s\n", filename);
-    return;
-  }
-
-  size_t size = f.size();
-  char* buf = new char[size];
-  f.readBytes(buf, size);
+  // FIX: strumieniowo [6]
+  JsonDocument doc;
+  auto err = deserializeJson(doc, f);
   f.close();
+  if (err) { Serial.printf("[ERROR] Config parse failed: %s\n", err.c_str()); return; }
 
-  StaticJsonDocument<2048> doc;
-  auto err = deserializeJson(doc, buf, size);
-  delete[] buf;  // Zwolnienie pamięci
+  netConfig.wifi_ssid     = doc["wifi_ssid"] | "";
+  netConfig.wifi_password = doc["wifi_password"] | "";
+  String mqttHostStr      = doc["mqtt_host"] | "";
+  netConfig.mqtt_port     = doc["mqtt_port"] | 1883;
 
-  if (err) {
-    Serial.printf("[ERROR] Config parse failed: %s\n", err.c_str());
-    return;
+  int a=0,b=0,c=0,d=0;
+  if (sscanf(mqttHostStr.c_str(), "%d.%d.%d.%d", &a,&b,&c,&d) == 4
+      && a>=0 && a<=255 && b>=0 && b<=255 && c>=0 && c<=255 && d>=0 && d<=255) {
+    netConfig.mqtt_host = IPAddress((uint8_t)a,(uint8_t)b,(uint8_t)c,(uint8_t)d);
+  } else {
+    Serial.println("[CONFIG] WARN: mqtt_host not IPv4 literal; attempt DNS");
+    // NOTE: AsyncMqttClient potrafi też używać hostname; tu pozostaw IP=0.0.0.0 jeśli brak [1]
   }
-
-  netConfig.wifi_ssid = doc["wifi_ssid"].as<String>();
-  netConfig.wifi_password = doc["wifi_password"].as<String>();
-  String mqttHostStr = doc["mqtt_host"].as<String>();
-  netConfig.mqtt_port = doc["mqtt_port"] | 1883; // default 1883
-
-  int parts[4] = {0};
-  sscanf(mqttHostStr.c_str(), "%d.%d.%d.%d", &parts[0], &parts[1], &parts[2], &parts[3]);
-  netConfig.mqtt_host = IPAddress(parts[0], parts[1], parts[2], parts[3]);
-  Serial.printf("[CONFIG] Loaded connection config\n");
+  Serial.printf("[CONFIG] Loaded connection config for SSID '%s'\n", netConfig.wifi_ssid.c_str());
 }

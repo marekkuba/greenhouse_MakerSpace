@@ -9,7 +9,7 @@ String makeTopic(String greenhouseIpAddress) {
 
 void connectToMqtt() {
     Serial.println("[MQTT] Attempting connection...");
-    Serial.printf("[MQTT] Broker: %d.%d.%d.%d:%d\n", netConfig.mqtt_host, netConfig.mqtt_host,netConfig.mqtt_host, netConfig.mqtt_host,netConfig.mqtt_port);
+    Serial.printf("[MQTT] Broker: %s:%d\n", netConfig.mqtt_host.toString().c_str(), netConfig.mqtt_port);
     mqttClient.connect();
 }
 

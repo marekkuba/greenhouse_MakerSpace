@@ -4,9 +4,6 @@
 
 
 
-// Chat kazal dodac by ogarnac blad 'strinfToScope' was not declared in this scope
-Scope stringToScope(const String& text);
-
 Scope stringToScope(const String& text) {
     if (text.equalsIgnoreCase("greenhouse")) return Scope::Greenhouse;
     if (text.equalsIgnoreCase("zone")) return Scope::Zone;
@@ -18,7 +15,7 @@ bool loadMappings() {
   if (!LittleFS.exists("/mapping.json")) { Serial.println("[MAP] /mapping.json not found"); return false; }
   File f = LittleFS.open("/mapping.json", "r");
   if (!f) { Serial.println("[MAP] open failed"); return false; }
-  StaticJsonDocument<4096> doc;
+  DynamicJsonDocument<4096> doc;
   auto err = deserializeJson(doc, f);
   f.close();
   if (err) { Serial.printf("[MAP] parse error: %s\n", err.c_str()); return false; }
@@ -31,7 +28,7 @@ bool loadMappings() {
     b.flowerpotId = o["flowerpotId"] | 0;
     b.paramName = o["paramName"] | "";
     b.readDriver = parseSensorDriver(o["readDriver"].as<String>());
-    b.readPin = o["readPin"] | 0;
+    b.readPin = o["readPin"] | -1;
     b.muxChannel = o["muxChannel"] | 0;
     if (o.containsKey("muxSelPins")) {
         b.muxSelPins.clear();
@@ -40,7 +37,7 @@ bool loadMappings() {
         }
     }
     b.writeDriver = parseSensorDriver(o["writeDriver"].as<String>());
-    b.writePin = o["writePin"] | 0;
+    b.writePin = o["writePin"] | -1;
     b.direction   = parseDirection(o["direction"].as<String>());
     b.hysteresis  = o["hysteresis"] | 0.5;
     b.activeLow   = o["activeLow"]  | false;
@@ -54,6 +51,13 @@ bool loadMappings() {
     if (b.outputMode == OutputMode::Unknown) {
       Serial.printf("[MAP] Warning: unknown outputMode for %s; defaulting to binary\n", b.paramName.c_str());
       b.outputMode = OutputMode::Binary;
+    }
+
+    if (b.writeDriver == SensorDriver::Digital) {
+      pinMode(b.writePin, OUTPUT);
+      const bool offLevel = b.activeLow ? HIGH : LOW;
+      digitalWrite(b.writePin, offLevel);
+      Serial.printf("[MAP] Init actuator pin %u OFF (activeLow=%d)\n", b.writePin, b.activeLow);
     }
     bindings.push_back(b);
   }

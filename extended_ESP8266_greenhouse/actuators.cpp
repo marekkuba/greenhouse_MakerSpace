@@ -1,17 +1,24 @@
 #include "actuators.h"
 #include <Arduino.h>
 #include "sensor_types.h"
+#include <map>
+
+static std::map<uint8_t, bool> gPinInit; // FIX: unikaj wielokrotnych pinMode [25]
 
 void writeActuator(SensorDriver driver, uint8_t pin, bool level) {
+    Serial.printf("Writing actuator, Level: %s \n", level ? "high":"low");
     switch (driver) {
         case SensorDriver::Digital: {
-            pinMode(pin, OUTPUT);
+            if (!gPinInit[pin]) {
+                pinMode(pin, OUTPUT);
+                gPinInit[pin] = true;
+            }
             digitalWrite(pin, level ? HIGH : LOW);
-        break;
+            break;
         }
         default:
-        // Unsupported actuator backend
-        break;
+            // Unsupported actuator backend
+            break;
     }
 }
 

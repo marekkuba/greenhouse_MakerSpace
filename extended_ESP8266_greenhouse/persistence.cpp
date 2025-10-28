@@ -1,4 +1,6 @@
 #include "persistence.h"
+#include "mappings.h"
+#include "model.h"
 
 void tryOfflineModelRestore() {
     String json;
@@ -13,12 +15,11 @@ void tryOfflineModelRestore() {
 
 
 bool saveTargets() {
-  StaticJsonDocument<4096> doc;
+  DynamicJsonDocument<4096> doc;
   JsonArray arr = doc.to<JsonArray>();
-  // potencjalny blad - powinno byc scopeToCode a nie const char* ale zostawiam poki co, bo kompiluje
-  auto addParam = [&](const char* scopeStr, uint32_t zoneId, uint32_t flowerpotId, const Parameter& p){
+  auto addParam = [&](Scope scope, uint32_t zoneId, uint32_t flowerpotId, const Parameter& p){
     JsonObject o = arr.createNestedObject();
-    o["scope"] = scopeStr;
+    o["scope"] = scopeToCode(scope);
     o["zoneId"] = zoneId;
     o["flowerpotId"] = flowerpotId;
     o["paramId"] = p.id;
@@ -26,12 +27,12 @@ bool saveTargets() {
   };
 
   // greenhouse-level
-  for (auto &p : greenhouse.parameters) addParam("greenhouse", 0, 0, p);
+  for (auto &p : greenhouse.parameters) addParam(Scope::Greenhouse, 0, 0, p);
   // zones
   for (auto &z : greenhouse.zones) {
-    for (auto &p : z.parameters) addParam("zone", z.id, 0, p);
+    for (auto &p : z.parameters) addParam(Scope::Zone, z.id, 0, p);
     for (auto &fp : z.flowerpots) {
-      for (auto &p : fp.parameters) addParam("flowerpot", z.id, fp.id, p);
+      for (auto &p : fp.parameters) addParam(Scope::Flowerpot, z.id, fp.id, p);
     }
   }
 
@@ -50,7 +51,7 @@ bool loadTargets() {
   }
   File f = LittleFS.open("/targets.json", "r");
   if (!f) { Serial.println("[PERSIST] Failed to open /targets.json"); return false; }
-  StaticJsonDocument<4096> doc;
+  DynamicJsonDocument<4096> doc;
   DeserializationError err = deserializeJson(doc, f);
   f.close();
   if (err) { Serial.printf("[PERSIST] Parse error: %s\n", err.c_str()); return false; }

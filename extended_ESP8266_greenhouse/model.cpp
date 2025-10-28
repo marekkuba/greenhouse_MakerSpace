@@ -14,10 +14,12 @@ void deserializeParameter(const JsonObject& src, Parameter& dst) {
     dst.max = src["max"] | NAN;
     dst.unit = src["unit"] | "";
     dst.parameterType = src["parameterType"] | "";
+
+    Serial.printf("[Deserialize Param] Param name: z:%s requestedVal: %.2f \n", dst.name.c_str(), dst.requestedValue);
 }
 
 bool parseGreenhouseJson(const char* json, size_t len) {
-  StaticJsonDocument<16384> doc; // increase if your model grows
+  DynamicJsonDocument<16384> doc; // increase if your model grows
   DeserializationError err = deserializeJson(doc, json, len);
   if (err) {
     Serial.printf("[MODEL] JSON parse error: %s\n", err.c_str());
@@ -86,7 +88,7 @@ bool parseGreenhouseJson(const char* json, size_t len) {
 }
 
 void publishModel() {
-    StaticJsonDocument<4096> doc;
+    DynamicJsonDocument<4096> doc;
 
     // Greenhouse-level parameters
     JsonArray ghParams = doc.createNestedArray("greenhouse");
@@ -129,4 +131,5 @@ void publishModel() {
     String output;
     serializeJson(doc, output);
     mqttClient.publish(greenhouse.ipAddress.c_str(), 1, true, output.c_str());
+    saveModelRaw(output.c_str(), output.length());
 }

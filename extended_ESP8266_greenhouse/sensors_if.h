@@ -104,12 +104,15 @@ private:
 class MuxAnalogSensor : public ISensor {
 public:
     MuxAnalogSensor(uint8_t mainPin, const std::vector<uint8_t>& selPins, uint8_t muxChannel)
-        : _mainPin(mainPin), _selPins(selPins), _muxChannel(muxChannel) {}
+        : _mainPin(mainPin), _selPins(selPins), _muxChannel(muxChannel) {
+        for (uint8_t pin : _selPins) {
+                    pinMode(pin, OUTPUT);
+                }
+        }
 
     bool read(const String&, float& out) override {
         // Set selector lines
         for (size_t i = 0; i < _selPins.size(); ++i) {
-            pinMode(_selPins[i], OUTPUT);
             digitalWrite(_selPins[i], (_muxChannel >> i) & 0x01);
         }
         delayMicroseconds(5); // let lines settle after changing selectors
