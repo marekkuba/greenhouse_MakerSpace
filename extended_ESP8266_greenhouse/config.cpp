@@ -13,7 +13,6 @@ void loadAllConfigs() {
     loadConfig();
     loadNetworkConfig();
     loadMappings();
-    loadTargets();
 }
 
 void loadConfig() {

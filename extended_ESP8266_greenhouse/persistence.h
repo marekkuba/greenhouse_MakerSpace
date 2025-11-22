@@ -15,9 +15,7 @@ inline Scope codeToScope(uint8_t code) {
   switch (code) { case 0: return Scope::Greenhouse; case 1: return Scope::Zone; case 2: return Scope::Flowerpot; }
   return Scope::Greenhouse;
 }
-struct TargetRec { Scope scope; uint32_t zoneId; uint32_t flowerpotId; uint32_t paramId; float requestedValue; };
-bool saveTargets();
-bool loadTargets();
+
 bool saveModelRaw(const char* buf, size_t len);
 bool loadModelRaw(String& out);
 bool saveConfigRaw(const char* jsonString, size_t len);
