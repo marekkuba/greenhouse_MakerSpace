@@ -16,7 +16,7 @@ inline Scope codeToScope(uint8_t code) {
   return Scope::Greenhouse;
 }
 
-bool saveModelRaw(const char* buf, size_t len);
+bool saveModelRaw(const char* jsonString, size_t len);
 bool loadModelRaw(String& out);
 bool saveConfigRaw(const char* jsonString, size_t len);
 bool saveMappingRaw(const char* jsonString, size_t len);

@@ -23,7 +23,7 @@ bool parseGreenhouseJson(const char* json, size_t len, bool saveToDisk) {
     // We only save if this came from the network (saveToDisk = true).
     // If we are booting up and loading FROM disk, we pass false to avoid loop.
     if (saveToDisk) {
-        if(saveModelRaw(json)) {
+        if(saveModelRaw(json, len)) {
             Serial.println("[MODEL] New configuration saved to flash.");
         } else {
             Serial.println("[MODEL] Error saving configuration!");

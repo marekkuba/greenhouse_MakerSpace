@@ -16,6 +16,7 @@
 #include "status.h"
 #include "scheduler.h"
 #include "mqtt_helpers.h"
+#include "globals.h"
 
 void handleReboot() {
     static unsigned long rebootTimer = 0;
@@ -56,7 +57,6 @@ void setup() {
   Serial.println(F("\n\n[BOOT] Starting..."));
 
   initSerial();
-  bootMessage();
   initFilesystem();
   loadAllConfigs();
   Serial.println("[SERIAL] Initialization complete");

@@ -6,15 +6,15 @@
 String getBaseTopic(String greenhouseIpAddress) {
   return "greenhouse/"+greenhouseIpAddress;
 }
+
 String getSubscriptionTopic(String greenhouseIpAddress){
     return getBaseTopic(greenhouseIpAddress)+"/set/+";
 }
-String getTopicToSend(){
-    return getBaseTopic()+"/model";
-}
+
 String getStatusTopic(String greenhouseIpAddress) {
     return getBaseTopic(greenhouseIpAddress)+ "/status";
 }
+
 void connectToMqtt() {
     Serial.println("[MQTT] Attempting connection...");
     Serial.printf("[MQTT] Broker: %s:%d\n", netConfig.mqtt_host.toString().c_str(), netConfig.mqtt_port);
@@ -23,7 +23,7 @@ void connectToMqtt() {
 
 void onMqttConnect(bool sessionPresent) {
   mqttClient.subscribe(getSubscriptionTopic(greenhouse.ipAddress).c_str(), 1);
-  Serial.println("[MQTT] Subscriptions set to: " + getSubscriptionTopic(greenhouseIpAddress).c_str());
+//  Serial.println("[MQTT] Subscriptions set to: " + getSubscriptionTopic(greenhouse.ipAddress).c_str());
 }
 
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {

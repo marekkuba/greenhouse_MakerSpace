@@ -2,13 +2,13 @@
 #include "mappings.h"
 #include "model.h"
 
-bool saveModelRaw(const char* jsonString) {
+bool saveModelRaw(const char* jsonString, size_t len) {
     File f = LittleFS.open("/model.json", "w");
     if (!f) return false;
-    size_t written = f.print(jsonString);
+    size_t written = f.write((const uint8_t*)jsonString, len);
     f.close();
     Serial.println("[FS] Model saved to flash.");
-    return written > 0;
+    return written == len;
 }
 
 bool loadModelRaw(String& outJson) {
