@@ -3,7 +3,7 @@
 #include "sensor_types.h"
 #include <map>
 
-static std::map<uint8_t, bool> gPinInit; // FIX: unikaj wielokrotnych pinMode [25]
+static std::map<uint8_t, bool> gPinInit;
 
 void writeActuator(SensorDriver driver, uint8_t pin, bool level) {
     Serial.printf("Writing actuator, Level: %s \n", level ? "high":"low");

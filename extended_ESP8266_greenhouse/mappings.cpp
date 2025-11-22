@@ -12,13 +12,23 @@ Scope stringToScope(const String& text) {
 }
 
 bool loadMappings() {
-  if (!LittleFS.exists("/mapping.json")) { Serial.println("[MAP] /mapping.json not found"); return false; }
+  if (!LittleFS.exists("/mapping.json")) {
+   Serial.println("[MAP] /mapping.json not found");
+    return false;
+    }
   File f = LittleFS.open("/mapping.json", "r");
-  if (!f) { Serial.println("[MAP] open failed"); return false; }
-  DynamicJsonDocument<4096> doc;
+  if (!f) {
+   Serial.println("[MAP] open failed");
+   return false;
+   }
+//  DynamicJsonDocument doc(4096);
+    StaticJsonDocument<4096> doc;
   auto err = deserializeJson(doc, f);
   f.close();
-  if (err) { Serial.printf("[MAP] parse error: %s\n", err.c_str()); return false; }
+  if (err) {
+   Serial.printf("[MAP] parse error: %s\n", err.c_str());
+    return false;
+     }
 
   bindings.clear();
   for (JsonObject o : doc.as<JsonArray>()) {
@@ -28,7 +38,7 @@ bool loadMappings() {
     b.flowerpotId = o["flowerpotId"] | 0;
     b.paramName = o["paramName"] | "";
     b.readDriver = parseSensorDriver(o["readDriver"].as<String>());
-    b.readPin = o["readPin"] | -1;
+    b.readPin = o["readPin"] | NO_PIN;
     b.muxChannel = o["muxChannel"] | 0;
     if (o.containsKey("muxSelPins")) {
         b.muxSelPins.clear();
@@ -37,7 +47,7 @@ bool loadMappings() {
         }
     }
     b.writeDriver = parseSensorDriver(o["writeDriver"].as<String>());
-    b.writePin = o["writePin"] | -1;
+    b.writePin = o["writePin"] | NO_PIN;
     b.direction   = parseDirection(o["direction"].as<String>());
     b.hysteresis  = o["hysteresis"] | 0.5;
     b.activeLow   = o["activeLow"]  | false;
@@ -53,7 +63,7 @@ bool loadMappings() {
       b.outputMode = OutputMode::Binary;
     }
 
-    if (b.writeDriver == SensorDriver::Digital) {
+    if (b.writeDriver == SensorDriver::Digital && b.writePin != NO_PIN) {
       pinMode(b.writePin, OUTPUT);
       const bool offLevel = b.activeLow ? HIGH : LOW;
       digitalWrite(b.writePin, offLevel);

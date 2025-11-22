@@ -21,15 +21,15 @@ void loop() {
     logStatusIfNeeded();
 
     // Always try to keep MQTT alive
-//     if (!ensureMqttConnected()) return;
+    if (!ensureMqttConnected()) return;
 
     // Always run control logic so actuators react ASAP
     controlTick();
 
-    // Only publish the model periodically
-//     if (timeToPublish()) {
-//         publishModel();
-//     }
+//     Only publish the model periodically
+    if (timeToPublish()) {
+        publishModel();
+    }
 }
 
 void initSerial() {
@@ -43,9 +43,11 @@ void bootMessage() {
 
 void setup() {
   initSerial();
+
   bootMessage();
   initFilesystem();
   loadAllConfigs();
+   Serial.println("[SERIAL] Initialization complete");
   tryOfflineModelRestore();
 
   registerWifiHandlers();

@@ -5,7 +5,7 @@
 
 bool ensureMqttConnected() {
     if (!mqttClient.connected()) {
-        Serial.println("[WARN] MQTT not connected, skipping publish");
+//        Serial.println("[WARN] MQTT not connected, skipping publish");
         if (WiFi.isConnected()) {
             connectToMqtt();
         }

@@ -15,14 +15,15 @@ void deserializeParameter(const JsonObject& src, Parameter& dst) {
     dst.unit = src["unit"] | "";
     dst.parameterType = src["parameterType"] | "";
 
-    Serial.printf("[Deserialize Param] Param name: z:%s requestedVal: %.2f \n", dst.name.c_str(), dst.requestedValue);
+//    Serial.printf("[Deserialize Param] Param name: z:%s requestedVal: %.2f \n", dst.name.c_str(), dst.requestedValue);
 }
 
 bool parseGreenhouseJson(const char* json, size_t len) {
-  DynamicJsonDocument<16384> doc; // increase if your model grows
+//  DynamicJsonDocument doc(16384); // increase if your model grows
+StaticJsonDocument<16384> doc;
   DeserializationError err = deserializeJson(doc, json, len);
   if (err) {
-    Serial.printf("[MODEL] JSON parse error: %s\n", err.c_str());
+//    Serial.printf("[MODEL] JSON parse error: %s\n", err.c_str());
     return false;
   }
 
@@ -80,7 +81,7 @@ bool parseGreenhouseJson(const char* json, size_t len) {
   }
 
   greenhouse = std::move(newGh);
-  Serial.println("[MODEL] Greenhouse model updated from JSON");
+//  Serial.println("[MODEL] Greenhouse model updated from JSON");
     /// call only if greenhouse from server is not full model
     //  applyPersistedTargetsToModel();
   saveTargets();
@@ -88,8 +89,8 @@ bool parseGreenhouseJson(const char* json, size_t len) {
 }
 
 void publishModel() {
-    DynamicJsonDocument<4096> doc;
-
+//    DynamicJsonDocument doc(4096);
+StaticJsonDocument<4096> doc;
     // Greenhouse-level parameters
     JsonArray ghParams = doc.createNestedArray("greenhouse");
     for (auto &p : greenhouse.parameters) {

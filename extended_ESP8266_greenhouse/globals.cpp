@@ -12,7 +12,6 @@ NetworkConfig netConfig;
 Greenhouse greenhouse;
 std::vector<ParamBinding> bindings;
 std::vector<DeviceConfig> devices;
-// Provide a default no-op. Will be overridden in loadTargets() if file exists.
 
 std::function<void(void)> applyPersistedTargetsToModel = [](){};
 WiFiEventHandler wifiConnectHandler;
@@ -21,5 +20,6 @@ AsyncMqttClient mqttClient;
 Ticker wifiReconnectTimer;
 Ticker mqttReconnectTimer;
 
-const unsigned long PUBLISH_INTERVAL = 10000;
+//const unsigned long PUBLISH_INTERVAL = 10000;
 unsigned long previousMillis = 0;
+//const uint8_t NO_PIN = 255;

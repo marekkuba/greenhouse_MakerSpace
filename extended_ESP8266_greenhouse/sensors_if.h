@@ -167,7 +167,7 @@ private:
             case SensorDriver::Digital: s = new DigitalSensor(pin); break;
             case SensorDriver::DHT22:   s = new DHT22Sensor(pin); break;
             default:
-                Serial.println(F("[SENSORS] Unknown or unsupported driver in getOrCreate"));
+//                Serial.println(F("[SENSORS] Unknown or unsupported driver in getOrCreate"));
                 break;
         }
         if (s) _sensors[key] = s;

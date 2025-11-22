@@ -15,7 +15,8 @@ void tryOfflineModelRestore() {
 
 
 bool saveTargets() {
-  DynamicJsonDocument<4096> doc;
+//  DynamicJsonDocument doc(4096);
+StaticJsonDocument<4096> doc;
   JsonArray arr = doc.to<JsonArray>();
   auto addParam = [&](Scope scope, uint32_t zoneId, uint32_t flowerpotId, const Parameter& p){
     JsonObject o = arr.createNestedObject();
@@ -37,8 +38,13 @@ bool saveTargets() {
   }
 
   File f = LittleFS.open("/targets.json", "w");
-  if (!f) { Serial.println("[PERSIST] Failed to open /targets.json for write"); return false; }
-  if (serializeJson(doc, f) == 0) { Serial.println("[PERSIST] Failed to write JSON"); f.close(); return false; }
+  if (!f) {
+  Serial.println("[PERSIST] Failed to open /targets.json for write");
+   return false; }
+
+  if (serializeJson(doc, f) == 0) {
+  Serial.println("[PERSIST] Failed to write JSON"); f.close();
+   return false; }
   f.close();
   Serial.println("[PERSIST] Saved targets");
   return true;
@@ -50,11 +56,17 @@ bool loadTargets() {
     return false;
   }
   File f = LittleFS.open("/targets.json", "r");
-  if (!f) { Serial.println("[PERSIST] Failed to open /targets.json"); return false; }
-  DynamicJsonDocument<4096> doc;
+  if (!f) {
+   Serial.println("[PERSIST] Failed to open /targets.json");
+    return false; }
+//  DynamicJsonDocument doc(4096);
+StaticJsonDocument<4096> doc;
   DeserializationError err = deserializeJson(doc, f);
+
   f.close();
-  if (err) { Serial.printf("[PERSIST] Parse error: %s\n", err.c_str()); return false; }
+  if (err) {
+   Serial.printf("[PERSIST] Parse error: %s\n", err.c_str());
+   return false; }
 
   // Temporarily store to apply after greenhouse model is parsed
   // We'll keep them in memory for one-shot apply
@@ -145,9 +157,9 @@ bool loadModelRaw(String& out) {
 
 bool initFilesystem() {
     if (!LittleFS.begin()) {
-        Serial.println("[ERROR] Failed to mount LittleFS");
+       Serial.println("[ERROR] Failed to mount LittleFS");
         return false;
     }
-    Serial.println("[FS] LittleFS mounted");
+   Serial.println("[FS] LittleFS mounted");
     return true;
 }

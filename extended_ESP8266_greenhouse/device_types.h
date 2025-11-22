@@ -2,8 +2,8 @@
 #include <Arduino.h>
 
 enum class DeviceType : uint8_t {
-    Value,     // a sensor that produces numeric readings
-    Toggle,    // an actuator with on/off state
+    Value,
+    Toggle,
     Unknown
 };
 

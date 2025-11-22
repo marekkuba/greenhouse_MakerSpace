@@ -1,3 +1,5 @@
+#include <LittleFS.h>
+
 #include "config.h"
 #include "sensor_types.h"
 #include "sensors_if.h"
@@ -11,18 +13,20 @@ void loadAllConfigs() {
     loadConfig();
     loadNetworkConfig();
     loadMappings();
-    loadTargets(); // prepare applyPersistedTargetsToModel if offline
+    loadTargets();
 }
 
 void loadConfig() {
-    if (!LittleFS.exists("/config.json")) {
-        Serial.println(F("[ERROR] /config.json not found"));
+    std::string filename = "/config.json";
+    Serial.printf("[INFO] trying to parse %s \n", filename.c_str());
+    if (!LittleFS.exists(filename.c_str())) {
+        Serial.printf("[ERROR] %s not found \n", filename.c_str());
         return;
     }
 
-    File f = LittleFS.open("/config.json", "r");
+    File f = LittleFS.open(filename.c_str(), "r");
     if (!f) {
-        Serial.println(F("[ERROR] Failed to open config.json"));
+        Serial.printf("[ERROR] Failed to open %s \n", filename.c_str());
         return;
     }
 
@@ -45,7 +49,7 @@ void loadConfig() {
         dev.pin          = obj["pin"]         | 0;
         dev.minValue     = obj.containsKey("minValue")    ? obj["minValue"].as<float>()  : NAN;
         dev.maxValue     = obj.containsKey("maxValue")    ? obj["maxValue"].as<float>()  : NAN;
-        Serial.printf("[CONFIG] Loaded %s\n", dev.name);
+        Serial.printf("[CONFIG] Loaded %s\n", dev.name.c_str());
 
         // Initialise actuators immediately
          if (dev.driver != SensorDriver::Unknown && dev.type == DeviceType::Value) {
@@ -61,14 +65,25 @@ void loadConfig() {
 }
 void loadNetworkConfig() {
   const char* filename = "/network_config.json";
-  if (!LittleFS.exists(filename)) { Serial.printf("[ERROR] %s not found\n", filename); return; }
-  File f = LittleFS.open(filename, "r"); if (!f) { Serial.printf("[ERROR] Failed to open %s\n", filename); return; }
+  if (!LittleFS.exists(filename)) {
+  Serial.printf("[ERROR] %s not found\n", filename);
+   return;
+  }
+   File f = LittleFS.open(filename, "r");
+   if (!f) {
+    Serial.printf("[ERROR] Failed to open %s\n", filename);
+    return;
+   }
 
   // FIX: strumieniowo [6]
   JsonDocument doc;
   auto err = deserializeJson(doc, f);
   f.close();
-  if (err) { Serial.printf("[ERROR] Config parse failed: %s\n", err.c_str()); return; }
+  if (err) {
+  Serial.printf("[ERROR] Config parse failed: %s\n", err.c_str());
+  return;
+   }
+
 
   netConfig.wifi_ssid     = doc["wifi_ssid"] | "";
   netConfig.wifi_password = doc["wifi_password"] | "";
@@ -81,7 +96,6 @@ void loadNetworkConfig() {
     netConfig.mqtt_host = IPAddress((uint8_t)a,(uint8_t)b,(uint8_t)c,(uint8_t)d);
   } else {
     Serial.println("[CONFIG] WARN: mqtt_host not IPv4 literal; attempt DNS");
-    // NOTE: AsyncMqttClient potrafi też używać hostname; tu pozostaw IP=0.0.0.0 jeśli brak [1]
   }
   Serial.printf("[CONFIG] Loaded connection config for SSID '%s'\n", netConfig.wifi_ssid.c_str());
 }
