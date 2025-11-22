@@ -23,4 +23,4 @@ bool loadModelRaw(String& out);
 bool saveConfigRaw(const char* jsonString, size_t len);
 bool saveMappingRaw(const char* jsonString, size_t len);
 bool initFilesystem();
-void tryOfflineModelRestore();
+

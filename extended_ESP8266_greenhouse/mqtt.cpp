@@ -52,7 +52,7 @@ void onMqttMessage(char* topic, char* payload,
 
   if (topicStr.startsWith(getSubscriptionTopic(greenhouse.ipAddress).c_str())) {
     if(topicStr.endsWith("/model")){
-        bool ok = parseGreenhouseJson(msg.c_str(), msg.length());
+        bool ok = parseGreenhouseJson(msg.c_str(), msg.length(), true);
         Serial.printf("[MODEL] Parse %s\n", ok ? "OK" : "FAIL");
         return;
     }else if(topicStr.endsWith("/config")){

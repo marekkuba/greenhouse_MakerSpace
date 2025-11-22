@@ -40,9 +40,9 @@ struct Greenhouse {
 };
 
 void deserializeParameter(const JsonObject& src, Parameter& dst);
-bool parseGreenhouseJson(const char* json, size_t len);
+bool parseGreenhouseJson(const char* json, size_t len, bool saveToDisk);
 
 
 void publishModel();
-
+void loadModel();
 extern Greenhouse greenhouse;

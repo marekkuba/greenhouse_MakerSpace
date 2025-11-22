@@ -52,23 +52,22 @@ void initSerial() {
     delay(1000);
 }
 
-void bootMessage() {
-    Serial.println(F("\n\n[BOOT] Starting..."));
-}
-
 void setup() {
+  Serial.println(F("\n\n[BOOT] Starting..."));
 
   initSerial();
-
   bootMessage();
   initFilesystem();
   loadAllConfigs();
-   Serial.println("[SERIAL] Initialization complete");
-  tryOfflineModelRestore();
+  Serial.println("[SERIAL] Initialization complete");
 
   registerWifiHandlers();
   registerMqttHandlers();
 
   Serial.println("[BOOT] Initialization complete");
   setupWifi();
+
+  Serial.println("[BOOT] trying to restore model");
+  loadModel();
+
 }

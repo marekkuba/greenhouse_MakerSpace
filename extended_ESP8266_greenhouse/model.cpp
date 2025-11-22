@@ -144,3 +144,12 @@ void publishModel() {
     ///TODO: zastanowic sie, czy powinnismy zapisywac ten model tutaj
 //    saveModelRaw(output.c_str(), output.length());
 }
+void loadModel() {
+    String json;
+    if (loadModelRaw(json)) {
+        Serial.println(F("[BOOT] Loaded saved greenhouse model."));
+        parseGreenhouseJson(json.c_str(),json.length(), false);
+    } else {
+        Serial.println(F("[BOOT] No saved model found. Waiting for Server..."));
+    }
+}

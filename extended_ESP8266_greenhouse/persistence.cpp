@@ -2,17 +2,6 @@
 #include "mappings.h"
 #include "model.h"
 
-void tryOfflineModelRestore() {
-    String json;
-    if (loadModelRaw(json)) {
-        Serial.println(F("[BOOT] Loaded saved greenhouse model."));
-        parseGreenhouseJson(json.c_str());
-    } else {
-        Serial.println(F("[BOOT] No saved model found. Waiting for Server..."));
-    }
-}
-
-
 bool saveModelRaw(const char* jsonString) {
     File f = LittleFS.open("/model.json", "w");
     if (!f) return false;
