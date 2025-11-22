@@ -13,13 +13,12 @@ Greenhouse greenhouse;
 std::vector<ParamBinding> bindings;
 std::vector<DeviceConfig> devices;
 
-std::function<void(void)> applyPersistedTargetsToModel = [](){};
 WiFiEventHandler wifiConnectHandler;
 WiFiEventHandler wifiDisconnectHandler;
 AsyncMqttClient mqttClient;
 Ticker wifiReconnectTimer;
 Ticker mqttReconnectTimer;
-
+bool systemRebootNeeded = false;
 //const unsigned long PUBLISH_INTERVAL = 10000;
 unsigned long previousMillis = 0;
 //const uint8_t NO_PIN = 255;

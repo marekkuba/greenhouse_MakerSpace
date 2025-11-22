@@ -17,17 +17,32 @@
 #include "scheduler.h"
 #include "mqtt_helpers.h"
 
-void loop() {
-    logStatusIfNeeded();
+void handleReboot() {
+    static unsigned long rebootTimer = 0;
+    if (systemRebootNeeded) {
+        if (rebootTimer == 0) {
+            // Start a countdown to allow MQTT ACK to be sent out
+            Serial.println("[SYS] Rebooting in 2 seconds...");
+            rebootTimer = millis();
+        }
 
-    // Always try to keep MQTT alive
-    if (!ensureMqttConnected()) return;
+        if (millis() - rebootTimer > 2000) {
+            Serial.println("[SYS] Restarting now.");
+            ESP.restart();
+        }
+    }
+}
+
+void loop() {
+    handleReboot();
+    if (systemRebootNeeded) return;
+    logStatusIfNeeded();
 
     // Always run control logic so actuators react ASAP
     controlTick();
 
 //     Only publish the model periodically
-    if (timeToPublish()) {
+    if (isMqttReady() && timeToPublish()) {
         publishModel();
     }
 }
@@ -42,6 +57,7 @@ void bootMessage() {
 }
 
 void setup() {
+
   initSerial();
 
   bootMessage();

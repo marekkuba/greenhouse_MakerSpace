@@ -1,2 +1,2 @@
 #pragma once
-bool ensureMqttConnected();
+bool isMqttReady();

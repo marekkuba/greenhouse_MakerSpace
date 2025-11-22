@@ -20,6 +20,8 @@ namespace {
 }
 
 void controlTick() {
+
+  //// czy to nie powinno byc na odwrot? isc po parametrach i szukac ich bindingow??
     for (auto &b : bindings) {
 //      Serial.printf("[MAP] Binding: z:%u fp:%u name=%s \n",
 //                    b.zoneId, b.flowerpotId, b.paramName.c_str());

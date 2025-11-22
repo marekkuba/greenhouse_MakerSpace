@@ -3,12 +3,9 @@
 #include "globals.h"  // for mqttClient
 #include <ESP8266WiFi.h>
 
-bool ensureMqttConnected() {
+bool isMqttReady() {
     if (!mqttClient.connected()) {
-//        Serial.println("[WARN] MQTT not connected, skipping publish");
-        if (WiFi.isConnected()) {
-            connectToMqtt();
-        }
+        Serial.println("[WARN] MQTT not connected, skipping publish");
         return false;
     }
     return true;

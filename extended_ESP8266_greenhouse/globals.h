@@ -23,9 +23,6 @@ extern Greenhouse greenhouse;                                // defined in globa
 extern std::vector<ParamBinding> bindings;                   // defined in globals.cpp [web:2][web:21]
 extern std::vector<DeviceConfig> devices;                    // defined in globals.cpp [web:2][web:21]
 
-// Will be assigned a lambda in globals.cpp
-extern std::function<void(void)> applyPersistedTargetsToModel; // defined in globals.cpp [web:2][web:21]
-
 // From WiFi/MQTT libs
 extern WiFiEventHandler wifiConnectHandler;                  // defined in globals.cpp [web:2][web:21]
 extern WiFiEventHandler wifiDisconnectHandler;               // defined in globals.cpp [web:2][web:21]
@@ -36,5 +33,9 @@ extern Ticker mqttReconnectTimer;                            // defined in globa
 // Timing
 const unsigned long PUBLISH_INTERVAL = 10000;                 // defined in globals.cpp [web:2][web:22]
 extern unsigned long previousMillis;                         // defined in globals.cpp [web:2][web:22]
+
+/// rebooting
+extern bool systemRebootNeeded;
+
 const uint8_t NO_PIN = 255;
 #endif // GLOBALS_H

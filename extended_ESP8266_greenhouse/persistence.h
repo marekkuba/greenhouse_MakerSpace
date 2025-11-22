@@ -20,6 +20,7 @@ bool saveTargets();
 bool loadTargets();
 bool saveModelRaw(const char* buf, size_t len);
 bool loadModelRaw(String& out);
-extern std::function<void(void)> applyPersistedTargetsToModel;
+bool saveConfigRaw(const char* jsonString, size_t len);
+bool saveMappingRaw(const char* jsonString, size_t len);
 bool initFilesystem();
 void tryOfflineModelRestore();
