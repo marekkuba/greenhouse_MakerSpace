@@ -13,7 +13,6 @@
 #include "mqtt.h"
 #include "network.h"
 #include "persistence.h"
-#include "status.h"
 #include "scheduler.h"
 #include "mqtt_helpers.h"
 #include "globals.h"
@@ -37,7 +36,6 @@ void handleReboot() {
 void loop() {
     handleReboot();
     if (systemRebootNeeded) return;
-    logStatusIfNeeded();
 
     // Always run control logic so actuators react ASAP
     controlTick();
