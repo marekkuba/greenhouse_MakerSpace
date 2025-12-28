@@ -40,7 +40,7 @@ void handleMQTTMessages(){
         newModelMessageArrived = false;
     }
     if(newConfigMessageArrived){
-         if (saveConfigRaw(newConfigMessage.c_str(), newConfigMessage.length()) {
+         if (saveConfigRaw(newConfigMessage.c_str(), newConfigMessage.length())) {
              //mqttClient.publish((getBaseTopic()+"/status/ack").c_str(), 0, false, "config_saved_rebooting");
              Serial.println("[SYS] Config saved. Reboot flagged.");
              systemRebootNeeded = true;
@@ -52,7 +52,7 @@ void handleMQTTMessages(){
          newConfigMessageArrived = false;
      }
     if(newBindingMessageArrived){
-        if (saveMappingRaw(newBindingMessage, newBindingMessage.length()) {
+        if (saveMappingRaw(newBindingMessage.c_str(), newBindingMessage.length())) {
                 //mqttClient.publish((getBaseTopic()+"/status/ack").c_str(), 0, false, "mapping_saved_rebooting");
                 Serial.println("[SYS] Mapping saved. Reboot flagged.");
                 systemRebootNeeded = true;
@@ -63,6 +63,7 @@ void handleMQTTMessages(){
         newBindingMessage = "";
         newBindingMessageArrived = false;
     }
+}
 }
 void loop() {
     handleReboot();
