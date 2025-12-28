@@ -48,33 +48,24 @@ void onMqttMessage(char* topic, char* payload,
   msg.reserve(len+1);
   for (size_t i=0;i<len;i++) msg += payload[i];
 
-//  Serial.printf("[MQTT] Message received: [%s] %s\n", t.c_str(), msg.c_str());
 
   if (topicStr.startsWith(getSubscriptionTopic(greenhouse.ipAddress).c_str())) {
     if(topicStr.endsWith("/model")){
+       Serial.println("[MQTT] Received New Model File");
         newModelMessage = msg.c_str();
         newModelMessageLen = msg.length();
         newModelMessageArrived = true;
-
         return;
     }else if(topicStr.endsWith("/config")){
        Serial.println("[MQTT] Received New Config File");
-     if (saveConfigRaw(msg.c_str(), len)) {
-//         mqttClient.publish((getBaseTopic()+"/status/ack").c_str(), 0, false, "config_saved_rebooting");
-         Serial.println("[SYS] Config saved. Reboot flagged.");
-         systemRebootNeeded = true;
-     } else {
-//         mqttClient.publish((getBaseTopic()+"/status/error").c_str(), 0, false, "config_invalid_json");
-     }
+       newConfigMessage = msg.c.str();
+       newConfigMessageLen = msg.length();
+       newConfigMessageArrived = true;
     }else if(topicStr.endsWith("/mapping")){
-        Serial.println("[MQTT] Received New Mapping File");
-        if (saveMappingRaw(msg.c_str(), len)) {
-//            mqttClient.publish((getBaseTopic()+"/status/ack").c_str(), 0, false, "mapping_saved_rebooting");
-            Serial.println("[SYS] Mapping saved. Reboot flagged.");
-            systemRebootNeeded = true;
-        } else {
-//             mqttClient.publish((getBaseTopic()+"/status/error").c_str(), 0, false, "mapping_invalid_json");
-        }
+       Serial.println("[MQTT] Received New Mapping File");
+       newBindingMessage = msg.c.str();
+       newBindingMessageLen = msg.length();
+       newBindingMessageArrived = true;
     }
   }
 }

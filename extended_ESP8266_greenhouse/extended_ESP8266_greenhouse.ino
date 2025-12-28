@@ -32,7 +32,34 @@ void handleReboot() {
         }
     }
 }
-
+void handleMQTTMessages(){
+    if(newModelMessageArrived){
+        bool ok = parseGreenhouseJson(newModelMessage, newModelMessageLen, true);
+        Serial.printf("[MODEL] Parse %s\n", ok ? "OK" : "FAIL");
+        newModelMessageArrived = false;
+    }
+    if(newConfigMessageArrived){
+         if (saveConfigRaw(newConfigMessage, newConfigMessageLen)) {
+             //mqttClient.publish((getBaseTopic()+"/status/ack").c_str(), 0, false, "config_saved_rebooting");
+             Serial.println("[SYS] Config saved. Reboot flagged.");
+             systemRebootNeeded = true;
+         }
+         else {
+             //mqttClient.publish((getBaseTopic()+"/status/error").c_str(), 0, false, "config_invalid_json");
+         }
+         newConfigMessageArrived = false;
+     }
+    if(newBindingMessageArrived){
+        if (saveMappingRaw(msg.c_str(), len)) {
+                //mqttClient.publish((getBaseTopic()+"/status/ack").c_str(), 0, false, "mapping_saved_rebooting");
+                Serial.println("[SYS] Mapping saved. Reboot flagged.");
+                systemRebootNeeded = true;
+        } else {
+          //mqttClient.publish((getBaseTopic()+"/status/error").c_str(), 0, false, "mapping_invalid_json");
+        }
+        newBindingMessageArrived = false;
+    }
+}
 void loop() {
     handleReboot();
     if (systemRebootNeeded) return;
@@ -42,12 +69,6 @@ void loop() {
         Serial.println(F("[SYS] Scheduled Daily Reboot to prevent memory fragmentation."));
         systemRebootNeeded = true; // Uses your existing reboot logic
     }
-    if(newModelMessageArrived){
-        bool ok = parseGreenhouseJson(newModelMessage, newModelMessageLen, true);
-        Serial.printf("[MODEL] Parse %s\n", ok ? "OK" : "FAIL");
-        newModelMessageArrived = false;
-    }
-
     readSensors();
     runControlLogic();
 
