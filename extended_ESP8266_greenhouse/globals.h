@@ -37,6 +37,9 @@ extern unsigned long previousMillis;                         // defined in globa
 /// rebooting
 extern bool systemRebootNeeded;
 
+
+extern String incomingPayloadBuffer;
+
 extern String newModelMessage;
 extern bool newModelMessageArrived;
 

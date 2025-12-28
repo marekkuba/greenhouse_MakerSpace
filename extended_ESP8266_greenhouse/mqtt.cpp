@@ -43,29 +43,45 @@ void onMqttMessage(char* topic, char* payload,
                    AsyncMqttClientMessageProperties props,
                    size_t len, size_t idx, size_t total) {
 
-  String topicStr = String(topic);
-  String msg;
-  msg.reserve(len+1);
-  for (size_t i=0;i<len;i++) msg += payload[i];
+  // 1. If this is the start of a new message (idx == 0), reset the buffer
+  if (idx == 0) {
+      incomingPayloadBuffer = "";
+      incomingPayloadBuffer.reserve(total); // Reserve memory to prevent fragmentation
+  }
 
+  // 2. Append the current chunk to the buffer
+  for (size_t i = 0; i < len; i++) {
+      incomingPayloadBuffer += payload[i];
+  }
 
-  if (topicStr.startsWith(getSubscriptionTopic(greenhouse.ipAddress).c_str())) {
-    if(topicStr.endsWith("/model")){
-       Serial.println("[MQTT] Received New Model File");
-        newModelMessage = msg;
-        newModelMessageArrived = true;
-        return;
-    }else if(topicStr.endsWith("/config")){
-       Serial.println("[MQTT] Received New Config File");
-       newConfigMessage = msg;
-       newConfigMessageArrived = true;
-    }else if(topicStr.endsWith("/mapping")){
-       Serial.println("[MQTT] Received New Mapping File");
-       newBindingMessage = msg;
-       newBindingMessageArrived = true;
-    }
+  // 3. Only process if we have received the TOTAL message length
+  if (idx + len == total) {
+      String topicStr = String(topic);
+
+      // Use the global 'incomingPayloadBuffer' instead of the partial 'payload'
+      if (topicStr.startsWith(getSubscriptionTopic(greenhouse.ipAddress).c_str())) {
+
+        if(topicStr.endsWith("/model")){
+           Serial.println("[MQTT] Received New Model File (Full)");
+            newModelMessage = incomingPayloadBuffer;
+            newModelMessageArrived = true;
+        }
+        else if(topicStr.endsWith("/config")){
+           Serial.println("[MQTT] Received New Config File (Full)");
+           newConfigMessage = incomingPayloadBuffer;
+           newConfigMessageArrived = true;
+        }
+        else if(topicStr.endsWith("/mapping")){
+           Serial.println("[MQTT] Received New Mapping File (Full)");
+           newBindingMessage = incomingPayloadBuffer;
+           newBindingMessageArrived = true;
+        }
+      }
+
+      incomingPayloadBuffer = "";
   }
 }
+
 void registerMqttHandlers() {
     mqttClient.onConnect(onMqttConnect);
     mqttClient.onDisconnect(onMqttDisconnect);

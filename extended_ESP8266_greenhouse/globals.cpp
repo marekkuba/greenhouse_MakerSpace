@@ -20,6 +20,8 @@ Ticker wifiReconnectTimer;
 Ticker mqttReconnectTimer;
 bool systemRebootNeeded = false;
 
+String incomingPayloadBuffer = "";
+
 String newModelMessage = "";
 bool newModelMessageArrived = false;
 

@@ -31,7 +31,7 @@ bool parseGreenhouseJson(const char* json, size_t len, bool saveToDisk) {
     }
     // B. Memory Allocation (CRITICAL CHANGE)
         // Use DynamicJsonDocument for large JSONs to use Heap instead of Stack
-        DynamicJsonDocument doc(20480); // 20KB Buffer (adjust as needed)
+        DynamicJsonDocument doc(10240); // 10KB Buffer (adjust as needed)
 
         DeserializationError err = deserializeJson(doc, json, len);
         if (err) {
