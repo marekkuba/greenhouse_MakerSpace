@@ -74,6 +74,9 @@ void loop() {
         Serial.println(F("[SYS] Scheduled Daily Reboot to prevent memory fragmentation."));
         systemRebootNeeded = true; // Uses your existing reboot logic
     }
+
+    handleMQTTMessages();
+
     readSensors();
     runControlLogic();
 
