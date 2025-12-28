@@ -34,12 +34,13 @@ void handleReboot() {
 }
 void handleMQTTMessages(){
     if(newModelMessageArrived){
-        bool ok = parseGreenhouseJson(newModelMessage, newModelMessageLen, true);
+        bool ok = parseGreenhouseJson(newModelMessage.c_str(), newModelMessage.length(), true);
         Serial.printf("[MODEL] Parse %s\n", ok ? "OK" : "FAIL");
+        newModelMessage="";
         newModelMessageArrived = false;
     }
     if(newConfigMessageArrived){
-         if (saveConfigRaw(newConfigMessage, newConfigMessageLen)) {
+         if (saveConfigRaw(newConfigMessage.c_str(), newConfigMessage.length()) {
              //mqttClient.publish((getBaseTopic()+"/status/ack").c_str(), 0, false, "config_saved_rebooting");
              Serial.println("[SYS] Config saved. Reboot flagged.");
              systemRebootNeeded = true;
@@ -47,16 +48,19 @@ void handleMQTTMessages(){
          else {
              //mqttClient.publish((getBaseTopic()+"/status/error").c_str(), 0, false, "config_invalid_json");
          }
+         newConfigMessage = "";
          newConfigMessageArrived = false;
      }
     if(newBindingMessageArrived){
-        if (saveMappingRaw(msg.c_str(), len)) {
+        if (saveMappingRaw(newBindingMessage, newBindingMessage.length()) {
                 //mqttClient.publish((getBaseTopic()+"/status/ack").c_str(), 0, false, "mapping_saved_rebooting");
                 Serial.println("[SYS] Mapping saved. Reboot flagged.");
                 systemRebootNeeded = true;
         } else {
           //mqttClient.publish((getBaseTopic()+"/status/error").c_str(), 0, false, "mapping_invalid_json");
         }
+
+        newBindingMessage = "";
         newBindingMessageArrived = false;
     }
 }

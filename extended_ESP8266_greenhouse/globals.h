@@ -37,5 +37,14 @@ extern unsigned long previousMillis;                         // defined in globa
 /// rebooting
 extern bool systemRebootNeeded;
 
+extern String newModelMessage;
+extern bool newModelMessageArrived;
+
+extern String newConfigMessage;
+extern bool newConfigMessageArrived;
+
+extern String newBindingMessage;
+extern bool newBindingMessageArrived;
+
 const uint8_t NO_PIN = 255;
 #endif // GLOBALS_H

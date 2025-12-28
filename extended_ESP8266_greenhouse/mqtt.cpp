@@ -52,19 +52,16 @@ void onMqttMessage(char* topic, char* payload,
   if (topicStr.startsWith(getSubscriptionTopic(greenhouse.ipAddress).c_str())) {
     if(topicStr.endsWith("/model")){
        Serial.println("[MQTT] Received New Model File");
-        newModelMessage = msg.c_str();
-        newModelMessageLen = msg.length();
+        newModelMessage = msg;
         newModelMessageArrived = true;
         return;
     }else if(topicStr.endsWith("/config")){
        Serial.println("[MQTT] Received New Config File");
-       newConfigMessage = msg.c.str();
-       newConfigMessageLen = msg.length();
+       newConfigMessage = msg;
        newConfigMessageArrived = true;
     }else if(topicStr.endsWith("/mapping")){
        Serial.println("[MQTT] Received New Mapping File");
-       newBindingMessage = msg.c.str();
-       newBindingMessageLen = msg.length();
+       newBindingMessage = msg;
        newBindingMessageArrived = true;
     }
   }

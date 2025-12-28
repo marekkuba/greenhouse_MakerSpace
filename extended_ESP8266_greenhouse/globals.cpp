@@ -19,16 +19,14 @@ AsyncMqttClient mqttClient;
 Ticker wifiReconnectTimer;
 Ticker mqttReconnectTimer;
 bool systemRebootNeeded = false;
-char* newModelMessage;
-int newModelMessageLen;
+
+String newModelMessage = "";
 bool newModelMessageArrived = false;
 
-char* newConfigMessage;
-int newConfigMessageLen;
+String newConfigMessage ="";
 bool newConfigMessageArrived = false;
 
-char* newBindingMessage;
-int newBindingMessageLen;
+String newBindingMessage = "";
 bool newBindingMessageArrived = false;
 //const unsigned long PUBLISH_INTERVAL = 10000;
 unsigned long previousMillis = 0;
