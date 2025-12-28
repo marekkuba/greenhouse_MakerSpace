@@ -21,8 +21,7 @@ bool loadMappings() {
    Serial.println("[MAP] open failed");
    return false;
    }
-//  DynamicJsonDocument doc(4096);
-    StaticJsonDocument<4096> doc;
+  DynamicJsonDocument doc(4096);
   auto err = deserializeJson(doc, f);
   f.close();
   if (err) {

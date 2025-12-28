@@ -37,6 +37,17 @@ void loop() {
     handleReboot();
     if (systemRebootNeeded) return;
 
+    // Check if 24 hours have passed since boot and reboot if yes
+    if (millis() - bootTime > REBOOT_INTERVAL_MS) {
+        Serial.println(F("[SYS] Scheduled Daily Reboot to prevent memory fragmentation."));
+        systemRebootNeeded = true; // Uses your existing reboot logic
+    }
+    if(newModelMessageArrived){
+        bool ok = parseGreenhouseJson(newModelMessage, newModelMessageLen, true);
+        Serial.printf("[MODEL] Parse %s\n", ok ? "OK" : "FAIL");
+        newModelMessageArrived = false;
+    }
+
     readSensors();
     runControlLogic();
 
@@ -53,7 +64,7 @@ void initSerial() {
 
 void setup() {
   Serial.println(F("\n\n[BOOT] Starting..."));
-
+  bootTime = millis();
   initSerial();
   initFilesystem();
   loadAllConfigs();

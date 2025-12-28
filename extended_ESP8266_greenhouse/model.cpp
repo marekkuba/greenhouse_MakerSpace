@@ -93,7 +93,7 @@ bool parseGreenhouseJson(const char* json, size_t len, bool saveToDisk) {
 // D. Atomic Swap
     // We built the object safely on the side. Now we move it to global.
     greenhouse = std::move(newGh);
-
+    resolveBindings();
     Serial.println("[MODEL] Internal structures updated.");
     return true;
 }

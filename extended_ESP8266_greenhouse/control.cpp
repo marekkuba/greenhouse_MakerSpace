@@ -23,27 +23,33 @@ inline uint16_t makeActKey(SensorDriver d, uint8_t pin) {
 // 1. RESOLUTION PHASE
 // ---------------------------------------------------------
 void resolveBindings() {
+    // 1. Backup the old actuator states before clearing
+    std::map<uint16_t, ActState> oldActStates = gAct;
+
     activeBindings.clear();
-    gAct.clear(); // Reset actuator states on config reload
+    gAct.clear();
 
     Serial.println(F("[CTRL] Resolving Bindings..."));
 
-    // Iterate through the raw configuration loaded from JSON
     for (const auto &b : bindings) {
-
-        // Perform the slow search now, so we don't have to do it in the loop
         Parameter* p = findParameter(b);
 
         if (p) {
             RuntimeBinding rb;
             rb.config = b;
-            rb.target = p; // Cache the direct pointer
-
+            rb.target = p;
             activeBindings.push_back(rb);
 
-            // Debug output
-            // Serial.printf("[CTRL] Resolved: '%s' (Z:%d P:%d) <-> Pins R:%d W:%d\n",
-            //               p->name.c_str(), b.zoneId, b.flowerpotId, b.readPin, b.writePin);
+            // 2. Restore state if this actuator existed previously
+            // Calculate the key for this specific driver/pin combo
+            if (b.writePin != NO_PIN) {
+                uint16_t key = makeActKey(b.writeDriver, b.writePin);
+
+                // If we had state for this pin, restore it so we don't lose minOn/minOff timers
+                if (oldActStates.count(key)) {
+                    gAct[key] = oldActStates[key];
+                }
+            }
         } else {
             Serial.printf("[WARN] Orphan Binding: Param '%s' (Z:%d P:%d) not found in Model.\n",
                           b.paramName.c_str(), b.zoneId, b.flowerpotId);
@@ -67,6 +73,7 @@ void readSensors() {
 
         float val = NAN;
 
+        yield(); /// to give some breathing space for wifi etc.
         // Use SensorManager to read hardware
         // Note: SensorManager handles its own caching (e.g. DHT22 2-sec interval)
         bool success = Sensors.read(
@@ -125,7 +132,7 @@ static void applyLogicAndWrite(ParamBinding &b, Parameter* p, bool wantOn, uint3
     p->actuatorState = st.on;
 
     // Special case: For Toggle buttons, the actuator state IS the value
-    if (p->parameterType.equalsIgnoreCase("TOGGLE")) {
+    if (p->parameterType.equalsIgnoreCase("TOGGLE") && p->readDriver == NO_PIN) {
         p->currentValue = st.on ? 1.0 : 0.0;
     }
 }
