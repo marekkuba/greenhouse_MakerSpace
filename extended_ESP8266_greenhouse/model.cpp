@@ -139,7 +139,7 @@ void publishModel() {
 
     // 4. Hand off to MQTT layer
     // The model says: "Here is my data, send it."
-    publishTelemetryJson(output);
+    publishTelemetryJson(output, greenhouse.ipAddress);
 
     ///TODO: zastanowic sie, czy powinnismy zapisywac ten model tutaj
 //    saveModelRaw(output.c_str(), output.length());

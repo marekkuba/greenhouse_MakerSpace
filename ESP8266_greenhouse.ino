@@ -56,7 +56,7 @@ unsigned long previousMillis = 0;   // Zmienna zapisujaca kiedy obyło sie ostat
 const long interval = 10000;        // czas w milisekundach po jakim ma publikowac dane na MQTT
 
 void connectToWifi() {
-  Serial.println("Connecting to Wi-Fi...");
+//   Serial.println("Connecting to Wi-Fi...");
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 }
 

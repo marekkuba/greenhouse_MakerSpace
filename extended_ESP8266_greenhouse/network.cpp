@@ -3,7 +3,7 @@
 #include "globals.h"
 
 void setupWifi() {
-Serial.println("[WIFI] Connecting to Wi-Fi...");
+//Serial.println("[WIFI] Connecting to Wi-Fi...");
   WiFi.mode(WIFI_STA);
 
   // Optional: Helps with stability

@@ -37,8 +37,8 @@ void loop() {
     handleReboot();
     if (systemRebootNeeded) return;
 
-    // Always run control logic so actuators react ASAP
-    controlTick();
+    readSensors();
+    runControlLogic();
 
 //     Only publish the model periodically
     if (isMqttReady() && timeToPublish()) {
@@ -67,5 +67,6 @@ void setup() {
 
   Serial.println("[BOOT] trying to restore model");
   loadModel();
+  resolveBindings();
 
 }

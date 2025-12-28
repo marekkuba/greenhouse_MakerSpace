@@ -5,6 +5,6 @@
 void connectToMqtt();
 void registerMqttHandlers();
 void publishGreenhouseState();
-void publishTelemetryJson(const String& jsonPayload);
+void publishTelemetryJson(const String& jsonPayload, String greenhouseIpAddress);
 extern AsyncMqttClient mqttClient;
 

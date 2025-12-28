@@ -87,7 +87,7 @@ void registerMqttHandlers() {
 
 void publishTelemetryJson(const String& jsonPayload, String greenhouseIpAddress) {
     if (!mqttClient.connected()) {
-        Serial.println("[WARN] MQTT not connected, cannot publish");
+//        Serial.println("[WARN] MQTT not connected, cannot publish");
         return;
     }
 

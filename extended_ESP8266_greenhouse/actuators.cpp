@@ -6,7 +6,7 @@
 static std::map<uint8_t, bool> gPinInit;
 
 void writeActuator(SensorDriver driver, uint8_t pin, bool level) {
-    Serial.printf("Writing actuator, Level: %s \n", level ? "high":"low");
+//    Serial.printf("Writing actuator, Level: %s PIN: %d \n", level ? "high":"low", pin);
     switch (driver) {
         case SensorDriver::Digital: {
             if (!gPinInit[pin]) {

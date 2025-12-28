@@ -1,127 +1,196 @@
 #include "control.h"
-#include "config.h"
-#include "sensors_if.h"
-#include "mappings.h"
-#include "actuators.h"
-#include "model.h"
-#include "mqtt.h"
-#include "globals.h"
+#include "sensors_if.h" // Assumes SensorManager 'Sensors' is available here
+#include "actuators.h"  // Assumes writeActuator is available here
+#include "globals.h"    // Access to global 'bindings' vector and 'greenhouse'
 
-namespace {
-    struct ActState {
-        bool on = false;
-        uint32_t lastChangeMs = 0;
-        uint8_t duty = 0; // reserved for future PWM mode
-    };
-    inline uint16_t actKey(SensorDriver d, uint8_t pin) {
-        return (uint16_t(pin) | (uint16_t(uint8_t(d)) << 8));
-    }
-    std::map<uint16_t, ActState> gAct;
+// The global list of optimized bindings
+std::vector<RuntimeBinding> activeBindings;
+
+// Internal state tracking for actuators (to handle minOn/minOff)
+// Key: (Driver << 8) | Pin
+struct ActState {
+    bool on = false;
+    uint32_t lastChangeMs = 0;
+};
+static std::map<uint16_t, ActState> gAct;
+
+// Helper to generate unique key for the state map
+inline uint16_t makeActKey(SensorDriver d, uint8_t pin) {
+    return (uint16_t(d) << 8) | pin;
 }
 
-void controlTick() {
+// ---------------------------------------------------------
+// 1. RESOLUTION PHASE
+// ---------------------------------------------------------
+void resolveBindings() {
+    activeBindings.clear();
+    gAct.clear(); // Reset actuator states on config reload
 
-  //// czy to nie powinno byc na odwrot? isc po parametrach i szukac ich bindingow??
-    for (auto &b : bindings) {
-//      Serial.printf("[MAP] Binding: z:%u fp:%u name=%s \n",
-//                    b.zoneId, b.flowerpotId, b.paramName.c_str());
+    Serial.println(F("[CTRL] Resolving Bindings..."));
+
+    // Iterate through the raw configuration loaded from JSON
+    for (const auto &b : bindings) {
+
+        // Perform the slow search now, so we don't have to do it in the loop
         Parameter* p = findParameter(b);
 
-        if (!p) continue;
-//      Serial.printf("[MAP] Parameter: name:%s \n",
-//                    p->name.c_str());
-        // 1. Read sensor → update model
-        float val = NAN;
-        if(b.readPin != NO_PIN){
-            if (Sensors.read(b.readDriver, b.readPin, p->name, val, b.muxChannel, b.muxSelPins)) {
-                p->currentValue = val;
-                 // model is up to date
-//                 Serial.printf("[MAP] Current value updated: %.2f \n",
-//                                     p->currentValue);
-            }
-        }
-        // 2. Control logic
-  if (b.writePin == NO_PIN) { // <-- SPRAWDZENIE 2 (dla zapisu)
-//      Serial.printf("NO WRITE PIN CONTROL.CPP\n");
-      continue;
-  }
-  if (!(p->mutableFlag && !isnan(p->requestedValue) && !isnan(p->currentValue))) continue;
-  // Sprawdzamy, czy to jest TOGGLE
-  if (p->parameterType.equalsIgnoreCase("TOGGLE")) {
-      // Dla TOGGLE, logika jest prosta: 1.0 = Włącz, 0.0 = Wyłącz
-      // (Używamy 0.5 jako progu dla bezpieczeństwa)
-      bool wantOn = (p->requestedValue > 0.5);
+        if (p) {
+            RuntimeBinding rb;
+            rb.config = b;
+            rb.target = p; // Cache the direct pointer
 
-      const uint16_t key = actKey(b.writeDriver, b.writePin);
-      auto &st = gAct[key];
+            activeBindings.push_back(rb);
 
-      // Używamy logiki minOn/minOff, aby zapobiec "cykaniu"
-      const uint32_t now = millis();
-      if (wantOn != st.on) {
-          const uint32_t elapsed = now - st.lastChangeMs;
-          if (wantOn && b.minOffMs && elapsed < b.minOffMs) {
-              // Chcemy włączyć, ale jeszcze nie minął minOffMs
-          } else if (!wantOn && b.minOnMs && elapsed < b.minOnMs) {
-              // Chcemy wyłączyć, ale jeszcze nie minął minOnMs
-          } else {
-              // Zmiana stanu jest dozwolona
-              st.on = wantOn;
-              st.lastChangeMs = now;
-          }
-      }
-
-      const bool level = b.activeLow ? !st.on : st.on;
-      writeActuator(b.writeDriver, b.writePin, level);
-
-      // Synchronizujemy model, aby odzwierciedlał stan faktyczny
-      p->actuatorState = st.on;
-      p->currentValue = st.on ? 1.0 : 0.0;
-
-      continue; // Kończymy pętlę dla tego parametru
-  }
-  const float err = p->requestedValue - p->currentValue;
-  const float h   = b.hysteresis;
-  const uint16_t key = actKey(b.writeDriver, b.writePin);
-  auto &st = gAct[key];
-  const uint32_t now = millis();
-
-  if (b.outputMode == OutputMode::Binary) {
-    bool wantOn = st.on; // hold inside deadband
-    if (b.direction == Direction::Increase) {
-        if (err >  h)      wantOn = true;
-            else if (err < -h) wantOn = false;
-        } else if (b.direction == Direction::Decrease) {
-            if (err < -h)      wantOn = true;
-            else if (err >  h) wantOn = false;
+            // Debug output
+            // Serial.printf("[CTRL] Resolved: '%s' (Z:%d P:%d) <-> Pins R:%d W:%d\n",
+            //               p->name.c_str(), b.zoneId, b.flowerpotId, b.readPin, b.writePin);
         } else {
-            // Unknown direction: keep previous state
+            Serial.printf("[WARN] Orphan Binding: Param '%s' (Z:%d P:%d) not found in Model.\n",
+                          b.paramName.c_str(), b.zoneId, b.flowerpotId);
         }
-        // Enforce minOn/minOff anti-chatter
-        if (wantOn != st.on) {
-            const uint32_t elapsed = now - st.lastChangeMs;
-            if (wantOn && b.minOffMs && elapsed < b.minOffMs) {
-                wantOn = st.on;
-            } else if (!wantOn && b.minOnMs && elapsed < b.minOnMs) {
-                wantOn = st.on;
+    }
+
+    Serial.printf("[CTRL] Resolution complete. %u active hardware links optimized.\n", activeBindings.size());
+}
+
+// ---------------------------------------------------------
+// 2. SENSING PHASE
+// ---------------------------------------------------------
+void readSensors() {
+    // Iterate only through bindings that have been resolved
+    for (auto &rb : activeBindings) {
+        ParamBinding &b = rb.config;
+        Parameter* p = rb.target; // INSTANT ACCESS - No searching
+
+        // strict check: if no sensor assigned, skip
+        if (b.readPin == NO_PIN) continue;
+
+        float val = NAN;
+
+        // Use SensorManager to read hardware
+        // Note: SensorManager handles its own caching (e.g. DHT22 2-sec interval)
+        bool success = Sensors.read(
+            b.readDriver,
+            b.readPin,
+            p->name,
+            val,
+            b.muxChannel,
+            b.muxSelPins
+        );
+
+        if (success) {
+            p->currentValue = val;
+            // Serial.printf("[READ] %s = %.2f\n", p->name.c_str(), val);
+        }
+    }
+}
+
+// ---------------------------------------------------------
+// 3. ACTUATION PHASE
+// ---------------------------------------------------------
+
+// Internal helper to apply Hysteresis/Timing logic and write to hardware
+static void applyLogicAndWrite(ParamBinding &b, Parameter* p, bool wantOn, uint32_t now) {
+    const uint16_t key = makeActKey(b.writeDriver, b.writePin);
+    ActState &st = gAct[key]; // Reference to static state
+
+    // --- Anti-Short-Cycle Logic (MinOn / MinOff) ---
+    if (wantOn != st.on) {
+        const uint32_t elapsed = now - st.lastChangeMs;
+
+        if (wantOn && b.minOffMs > 0 && elapsed < b.minOffMs) {
+            // We want to turn ON, but we haven't been OFF long enough
+            wantOn = false;
+        }
+        else if (!wantOn && b.minOnMs > 0 && elapsed < b.minOnMs) {
+            // We want to turn OFF, but we haven't been ON long enough
+            wantOn = true;
+        }
+        else {
+            // State change allowed
+            st.on = wantOn;
+            st.lastChangeMs = now;
+        }
+    }
+    // If state didn't change, we keep st.on as is.
+
+    // --- Hardware Write ---
+    // Handle Active Low logic (if activeLow=true, ON means logic LOW)
+    bool physicalLevel = b.activeLow ? !st.on : st.on;
+
+    writeActuator(b.writeDriver, b.writePin, physicalLevel);
+
+    // --- Model Feedback ---
+    // Update the model so the UI knows if the heater is actually running
+    p->actuatorState = st.on;
+
+    // Special case: For Toggle buttons, the actuator state IS the value
+    if (p->parameterType.equalsIgnoreCase("TOGGLE")) {
+        p->currentValue = st.on ? 1.0 : 0.0;
+    }
+}
+
+void runControlLogic() {
+    uint32_t now = millis();
+
+    for (auto &rb : activeBindings) {
+        ParamBinding &b = rb.config;
+        Parameter* p = rb.target; // INSTANT ACCESS
+
+        // Strict check: if no actuator assigned, skip
+        if (b.writePin == NO_PIN) continue;
+
+        // Strict check: if parameter is immutable or has no target, skip
+        if (!p->mutableFlag) continue;
+        if (isnan(p->requestedValue)) continue;
+
+        // ---------------------------
+        // LOGIC TYPE A: TOGGLE (Light, Valve)
+        // ---------------------------
+        if (p->parameterType.equalsIgnoreCase("TOGGLE")) {
+            // Simple threshold: > 0.5 is ON
+            bool wantOn = (p->requestedValue > 0.5);
+            applyLogicAndWrite(b, p, wantOn, now);
+            continue;
+        }
+
+        // ---------------------------
+        // LOGIC TYPE B: REGULATION (Heater, Cooler, Humidifier)
+        // ---------------------------
+
+        // Safety: If we don't know the current value, DO NOT run logic
+        if (isnan(p->currentValue)) continue;
+
+        float err = p->requestedValue - p->currentValue;
+        bool wantOn = p->actuatorState; // Default: Maintain current state (Deadband)
+
+        if (b.direction == Direction::Increase) {
+            // Example: HEATER
+            // Target 25, Current 20 -> Err +5.
+            // If Err > Hyst (e.g. 0.5), turn ON.
+            if (err > b.hysteresis) {
+                wantOn = true;
             }
-            if (wantOn != st.on) {
-                st.on = wantOn;
-                st.lastChangeMs = now;
+            // Target 25, Current 26 -> Err -1.
+            // If Err < -Hyst, turn OFF.
+            else if (err < -b.hysteresis) {
+                wantOn = false;
+            }
+        }
+        else if (b.direction == Direction::Decrease) {
+            // Example: COOLER
+            // Target 20, Current 25 -> Err -5.
+            // If Err < -Hyst, turn ON.
+            if (err < -b.hysteresis) {
+                wantOn = true;
+            }
+            // Target 20, Current 19 -> Err +1.
+            // If Err > Hyst, turn OFF.
+            else if (err > b.hysteresis) {
+                wantOn = false;
             }
         }
 
-        const bool level = b.activeLow ? !st.on : st.on;
-        writeActuator(b.writeDriver, b.writePin, level);
-        p->actuatorState = st.on;
+        applyLogicAndWrite(b, p, wantOn, now);
     }
-  else if (b.outputMode == OutputMode::PWM) {
-        // TODO (future): proportional control
-        // float absErr = fabs(err);
-        // uint8_t duty = computeDuty(absErr); // map/clamp 0..255
-        // if (b.activeLow) duty = 255 - duty;
-        // st.duty = duty;
-        // writeActuatorPWM(b.writeDriver, b.writePin, st.duty, b.activeLow);
-        // p->actuatorState = (st.duty > 0);
-    }
-  }
 }
