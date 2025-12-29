@@ -3,6 +3,7 @@
 #include "globals.h"
 
 void setupWifi() {
+Serial.println("[WIFI] Scanning for networks...");
   Serial.println("[WIFI] Connecting to Wi-Fi...");
   WiFi.mode(WIFI_STA);
 
@@ -20,7 +21,7 @@ void onWifiConnect(const WiFiEventStationModeGotIP& event) {
 }
 
 void onWifiDisconnect(const WiFiEventStationModeDisconnected& event) {
-  Serial.println("[WIFI] Disconnected!");
+  Serial.printf("[WIFI] Disconnected! Reason: %d\n", event.reason);
   mqttReconnectTimer.detach();
   wifiReconnectTimer.once(2, setupWifi);
 }
