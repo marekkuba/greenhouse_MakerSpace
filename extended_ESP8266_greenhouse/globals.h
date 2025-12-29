@@ -36,8 +36,8 @@ extern unsigned long previousMillis;                         // defined in globa
 
 /// rebooting
 extern bool systemRebootNeeded;
-
-
+extern unsigned long bootTime;
+extern unsigned long REBOOT_INTERVAL_MS;
 extern String incomingPayloadBuffer;
 
 extern String newModelMessage;

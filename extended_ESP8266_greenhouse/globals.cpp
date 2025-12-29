@@ -33,5 +33,5 @@ bool newBindingMessageArrived = false;
 //const unsigned long PUBLISH_INTERVAL = 10000;
 unsigned long previousMillis = 0;
 //const uint8_t NO_PIN = 255;
-const unsigned long REBOOT_INTERVAL_MS = 24UL * 60UL * 60UL * 1000UL; // 24 Hours
+unsigned long REBOOT_INTERVAL_MS = 24UL * 60UL * 60UL * 1000UL; // 24 Hours
 unsigned long bootTime = 0;

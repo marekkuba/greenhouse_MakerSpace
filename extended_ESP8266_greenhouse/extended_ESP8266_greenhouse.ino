@@ -64,15 +64,14 @@ void handleMQTTMessages(){
         newBindingMessageArrived = false;
     }
 }
-}
+
 void loop() {
     handleReboot();
     if (systemRebootNeeded) return;
 
-    // Check if 24 hours have passed since boot and reboot if yes
     if (millis() - bootTime > REBOOT_INTERVAL_MS) {
-        Serial.println(F("[SYS] Scheduled Daily Reboot to prevent memory fragmentation."));
-        systemRebootNeeded = true; // Uses your existing reboot logic
+        Serial.println("[SYS] Scheduled Daily Reboot to prevent memory fragmentation.");
+        systemRebootNeeded = true;
     }
 
     handleMQTTMessages();

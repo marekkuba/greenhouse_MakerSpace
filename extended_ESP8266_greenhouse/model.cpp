@@ -1,6 +1,7 @@
 #include "model.h"
 #include "mqtt.h"
 #include "persistence.h"
+#include "control.h"
 #include <Arduino.h>
 #include <WString.h>
 
@@ -94,7 +95,7 @@ bool parseGreenhouseJson(const char* json, size_t len, bool saveToDisk) {
     // We built the object safely on the side. Now we move it to global.
     greenhouse = std::move(newGh);
     resolveBindings();
-    Serial.println("[MODEL] Internal structures updated.");
+    Serial.println("[MODEL1] Internal structures updated.");
     return true;
 }
 

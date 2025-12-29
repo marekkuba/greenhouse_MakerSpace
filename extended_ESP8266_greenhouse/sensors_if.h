@@ -40,6 +40,7 @@ class AnalogSensor : public ISensor {
 public:
     explicit AnalogSensor(uint8_t pin) : _pin(pin) {}
     bool read(const String&, float& out) override {
+//        Serial.printf("[READ] read from analog sensor\n");
         out = analogRead(_pin);
         _lastRead = millis();
         return true;
@@ -55,6 +56,7 @@ class DigitalSensor : public ISensor {
 public:
     explicit DigitalSensor(uint8_t pin) : _pin(pin) { pinMode(pin, INPUT); }
     bool read(const String&, float& out) override {
+//    Serial.printf("[READ] read from digital sensor\n");
         out = digitalRead(_pin);
         _lastRead = millis();
         return true;
@@ -67,39 +69,57 @@ private:
 
 // DHT22 sensor
 class DHT22Sensor : public ISensor {
-public:
-    explicit DHT22Sensor(uint8_t pin) : _pin(pin), _dht(pin, DHT22) {
-        _dht.begin();
-    }
-    bool read(const String& paramName, float& out) override {
-        unsigned long now = millis();
-        const unsigned long minInterval = 2000;
-        if (now - _lastSample >= minInterval || isnan(_temp) || isnan(_hum)) {
-            float t = _dht.readTemperature();
-            float h = _dht.readHumidity();
-            if (!isnan(t)) _temp = t;
-            if (!isnan(h)) _hum = h;
-            _lastSample = now;
-        }
-        if (paramName.equalsIgnoreCase("humidity") ||
-            paramName.equalsIgnoreCase("air_humidity")) {
-            out = _hum;
-        } else {
-            out = _temp;
-        }
-        _lastRead = now;
-        return !isnan(out);
-    }
-    unsigned long lastReadMs() const override { return _lastRead; }
-private:
-    uint8_t _pin;
-    DHT _dht;
-    float _temp = NAN;
-    float _hum  = NAN;
-    unsigned long _lastSample = 0;
-    unsigned long _lastRead   = 0;
-};
+       public:
+           explicit DHT22Sensor(uint8_t pin) : _pin(pin), _dht(pin, DHT22) {
+               _dht.begin();
+           }
 
+           bool read(const String& paramName, float& out) override {
+               // Debug log is fine, but be aware it prints on every check
+               // Serial.printf("[READ] checking DHT22 sensor logic...\n");
+
+               unsigned long now = millis();
+               const unsigned long minInterval = 2000;
+
+               // FIX: Strictly enforce the time interval.
+               // Do NOT bypass this check even if values are currently NAN.
+               if (now - _lastSample >= minInterval) {
+
+                   float t = _dht.readTemperature();
+                   float h = _dht.readHumidity();
+
+                   // Only update our cached values if the sensor returned valid numbers
+                   if (!isnan(t)) _temp = t;
+                   if (!isnan(h)) _hum = h;
+
+                   // Log only when we actually attempt a hardware read
+//                   Serial.printf("[READ] DHT22 Hardware Poll -> Temp: %.2f, Hum: %.2f\n", t, h);
+
+                   _lastSample = now;
+               }
+
+               // Output whatever valid data we have cached (or NAN if we haven't got a good read yet)
+               if (paramName.equalsIgnoreCase("humidity") ||
+                   paramName.equalsIgnoreCase("air_humidity")) {
+                   out = _hum;
+               } else {
+                   out = _temp;
+               }
+
+               _lastRead = now;
+               return !isnan(out);
+           }
+
+           unsigned long lastReadMs() const override { return _lastRead; }
+
+       private:
+           uint8_t _pin;
+           DHT _dht;
+           float _temp = NAN;
+           float _hum  = NAN;
+           unsigned long _lastSample = 0;
+           unsigned long _lastRead   = 0;
+       };
 // Mux analog sensor
 class MuxAnalogSensor : public ISensor {
 public:
@@ -112,6 +132,7 @@ public:
 
     bool read(const String&, float& out) override {
         // Set selector lines
+//        Serial.printf("[READ] read from MuxAnalog sensor\n");
         for (size_t i = 0; i < _selPins.size(); ++i) {
             digitalWrite(_selPins[i], (_muxChannel >> i) & 0x01);
         }

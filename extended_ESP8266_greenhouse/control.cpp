@@ -87,7 +87,7 @@ void readSensors() {
 
         if (success) {
             p->currentValue = val;
-            // Serial.printf("[READ] %s = %.2f\n", p->name.c_str(), val);
+//             Serial.printf("[READ] %s = %.2f\n", p->name.c_str(), val);
         }
     }
 }
@@ -132,7 +132,7 @@ static void applyLogicAndWrite(ParamBinding &b, Parameter* p, bool wantOn, uint3
     p->actuatorState = st.on;
 
     // Special case: For Toggle buttons, the actuator state IS the value
-    if (p->parameterType.equalsIgnoreCase("TOGGLE") && p->readDriver == NO_PIN) {
+    if (p->parameterType.equalsIgnoreCase("TOGGLE") && b.readPin == NO_PIN) {
         p->currentValue = st.on ? 1.0 : 0.0;
     }
 }

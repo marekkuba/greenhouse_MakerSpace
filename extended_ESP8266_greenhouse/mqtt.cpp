@@ -23,7 +23,7 @@ void connectToMqtt() {
 
 void onMqttConnect(bool sessionPresent) {
   mqttClient.subscribe(getSubscriptionTopic(greenhouse.ipAddress).c_str(), 1);
-//  Serial.println("[MQTT] Subscriptions set to: " + getSubscriptionTopic(greenhouse.ipAddress).c_str());
+  Serial.println("[MQTT] Connected!");
 }
 
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
