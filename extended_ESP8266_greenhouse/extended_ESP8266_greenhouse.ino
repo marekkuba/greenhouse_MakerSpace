@@ -17,6 +17,12 @@
 #include "mqtt_helpers.h"
 #include "globals.h"
 
+const long SENSOR_INTERVAL = 2000;  // Read sensors every 2 seconds
+const long CONTROL_INTERVAL = 1000; // Update control logic every 1 second
+
+unsigned long lastSensorRun = 0;
+unsigned long lastControlRun = 0;
+
 void handleReboot() {
     static unsigned long rebootTimer = 0;
     if (systemRebootNeeded) {
@@ -68,17 +74,25 @@ void handleMQTTMessages(){
 void loop() {
     handleReboot();
     if (systemRebootNeeded) return;
-
-    if (millis() - bootTime > REBOOT_INTERVAL_MS) {
+    unsigned long currentMillis = millis();
+    if (currentMillis - bootTime > REBOOT_INTERVAL_MS) {
         Serial.println("[SYS] Scheduled Daily Reboot to prevent memory fragmentation.");
         systemRebootNeeded = true;
     }
 
     handleMQTTMessages();
 
-    readSensors();
-    runControlLogic();
+    if (currentMillis - lastSensorRun >= SENSOR_INTERVAL) {
+        lastSensorRun = currentMillis;
+        readSensors();
+        // Serial.println("[SYS] Sensors read"); // debug
+    }
 
+    // 3. Run Control Logic (Only every 1 second)
+    if (currentMillis - lastControlRun >= CONTROL_INTERVAL) {
+        lastControlRun = currentMillis;
+        runControlLogic();
+    }
 //     Only publish the model periodically
     if (isMqttReady() && timeToPublish()) {
         publishModel();
