@@ -53,6 +53,10 @@ bool loadMappings() {
     b.minOnMs     = o["minOnMs"]    | 0;
     b.minOffMs    = o["minOffMs"]   | 0;
     b.outputMode  = parseOutputMode(o["outputMode"] | "binary");
+    b.mapInMin  = o["mapInMin"] | 0.0f;
+    b.mapInMax  = o["mapInMax"] | 0.0f;
+    b.mapOutMin = o["mapOutMin"] | 0.0f;
+    b.mapOutMax = o["mapOutMax"] | 0.0f;
     if (b.direction == Direction::Unknown) {
       Serial.printf("[MAP] Warning: unknown direction for %s; defaulting to increase\n", b.paramName.c_str());
       b.direction = Direction::Increase;
@@ -68,6 +72,7 @@ bool loadMappings() {
       digitalWrite(b.writePin, offLevel);
       Serial.printf("[MAP] Init actuator pin %u OFF (activeLow=%d)\n", b.writePin, b.activeLow);
     }
+
     bindings.push_back(b);
   }
   Serial.printf("[MAP] Loaded %d bindings\n", (int)bindings.size());

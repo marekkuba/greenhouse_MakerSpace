@@ -66,6 +66,12 @@ struct ParamBinding {
     uint32_t   minOnMs = 0;
     uint32_t   minOffMs = 0;
     OutputMode outputMode = OutputMode::Binary;
+
+    //Mapping values
+    float mapInMin = 0.0f;
+    float mapInMax = 0.0f;
+    float mapOutMin = 0.0f;
+    float mapOutMax = 0.0f;
 };
 
 bool loadMappings();

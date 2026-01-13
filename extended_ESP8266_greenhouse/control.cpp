@@ -6,6 +6,10 @@
 // The global list of optimized bindings
 std::vector<RuntimeBinding> activeBindings;
 
+float mapFloat(float x, float in_min, float in_max, float out_min, float out_max) {
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
 // Internal state tracking for actuators (to handle minOn/minOff)
 // Key: (Driver << 8) | Pin
 struct ActState {
@@ -86,8 +90,10 @@ void readSensors() {
         );
 
         if (success) {
+            if (b.mapInMin != b.mapInMax) {
+                val = mapFloat(val, b.mapInMin, b.mapInMax, b.mapOutMin, b.mapOutMax);
+            }
             p->currentValue = val;
-//             Serial.printf("[READ] %s = %.2f\n", p->name.c_str(), val);
         }
     }
 }
@@ -132,7 +138,7 @@ static void applyLogicAndWrite(ParamBinding &b, Parameter* p, bool wantOn, uint3
     p->actuatorState = st.on;
 
     // Special case: For Toggle buttons, the actuator state IS the value
-    if (p->parameterType.equalsIgnoreCase("TOGGLE") && b.readPin == NO_PIN) {
+    if (b.readPin == NO_PIN) {
         p->currentValue = st.on ? 1.0 : 0.0;
     }
 }

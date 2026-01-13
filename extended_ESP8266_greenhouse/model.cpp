@@ -100,6 +100,7 @@ bool parseGreenhouseJson(const char* json, size_t len, bool saveToDisk) {
 }
 
 void publishModel() {
+    Serial.println("[MODEL] Trying to publish model");
     // 1. Allocate (Use Dynamic for safety on ESP32)
     DynamicJsonDocument doc(4096);
 

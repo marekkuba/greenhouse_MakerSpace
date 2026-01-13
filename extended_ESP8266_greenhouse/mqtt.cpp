@@ -93,7 +93,7 @@ void registerMqttHandlers() {
 
 void publishTelemetryJson(const String& jsonPayload, String greenhouseIpAddress) {
     if (!mqttClient.connected()) {
-//        Serial.println("[WARN] MQTT not connected, cannot publish");
+        Serial.println("[WARN] MQTT not connected, cannot publish");
         return;
     }
 
@@ -102,5 +102,5 @@ void publishTelemetryJson(const String& jsonPayload, String greenhouseIpAddress)
     // Publish: QoS 0, Retain False (for live status)
     mqttClient.publish(topic.c_str(), 0, false, jsonPayload.c_str());
 
-    // Serial.printf("[MQTT] Published %d bytes to %s\n", jsonPayload.length(), topic.c_str());
+     Serial.printf("[MQTT] Published %d bytes to %s\n", jsonPayload.length(), topic.c_str());
 }
