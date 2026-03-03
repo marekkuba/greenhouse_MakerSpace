@@ -142,7 +142,19 @@ static void applyLogicAndWrite(ParamBinding &b, Parameter* p, bool wantOn, uint3
         p->currentValue = st.on ? 1.0 : 0.0;
     }
 }
+static void applyLogicAndWritePWM(ParamBinding &b, Parameter* p, float targetValue) {
+    // Basic write
+    writeActuatorPWM(b.writeDriver, b.writePin, targetValue);
 
+    // Update model state
+    // For PWM, "actuatorState" (bool) is true if value > 0
+    p->actuatorState = (targetValue > 1.0f);
+
+    // For manual control (ReadPin == NO_PIN), the currentValue IS the requestedValue
+    if (b.readPin == NO_PIN) {
+        p->currentValue = targetValue;
+    }
+}
 void runControlLogic() {
     uint32_t now = millis();
 
@@ -156,7 +168,33 @@ void runControlLogic() {
         // Strict check: if parameter is immutable or has no target, skip
         if (!p->mutableFlag) continue;
         if (isnan(p->requestedValue)) continue;
+        if (b.outputMode == OutputMode::PWM) {
+            float targetPWM = 0.0f;
 
+            // Case A: Manual Control (No sensor feedback)
+            // The requestedValue IS the speed (0-100%)
+            if (b.readPin == NO_PIN) {
+                targetPWM = p->requestedValue;
+            }
+            // Case B: Proportional Control (Sensor feedback exists)
+            // Example: As Temp exceeds target, Fan speeds up
+            else if (!isnan(p->currentValue)) {
+                float err = p->currentValue - p->requestedValue;
+                // Simple Proportional Gain (K=10 for example)
+                // If Temp is 2 degrees over, Fan = 2 * 10 = 20%
+                // You might want to make Gain configurable later, for now hardcode or use simple scaling
+                float gain = 10.0f;
+
+                if (b.direction == Direction::Decrease) { // Cooling
+                     if (err > 0) targetPWM = err * gain;
+                } else if (b.direction == Direction::Increase) { // Heating
+                     if (err < 0) targetPWM = -err * gain;
+                }
+            }
+
+            applyLogicAndWritePWM(b, p, targetPWM);
+            continue; // Skip the rest of the loop for this binding
+        }
         // ---------------------------
         // LOGIC TYPE A: TOGGLE (Light, Valve)
         // ---------------------------

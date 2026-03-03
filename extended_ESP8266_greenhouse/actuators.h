@@ -4,4 +4,4 @@
 
 void writeActuator(SensorDriver driver, uint8_t pin, bool level);
 // Future PWM (commented until implemented)
-// void writeActuatorPWM(SensorDriver driver, uint8_t pin, uint8_t duty, bool activeLow);
+void writeActuatorPWM(SensorDriver driver, uint8_t pin, float dutyPercent);

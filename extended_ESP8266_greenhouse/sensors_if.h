@@ -93,7 +93,7 @@ class DHT22Sensor : public ISensor {
                    if (!isnan(h)) _hum = h;
 
                    // Log only when we actually attempt a hardware read
-//                   Serial.printf("[READ] DHT22 Hardware Poll -> Temp: %.2f, Hum: %.2f\n", t, h);
+                   Serial.printf("[READ] DHT22 Hardware Poll -> Temp: %.2f, Hum: %.2f\n", t, h);
 
                    _lastSample = now;
                }

@@ -1,0 +1,27 @@
+[
+  {
+    "name": "Main Heater",
+    "driver": "digital",
+    "type": "value",
+    "pin": 0
+  },
+  {
+    "name": "Humidifier",
+    "driver": "digital",
+    "type": "value",
+    "pin": 2
+  },
+  {
+    "name": "Light",
+    "driver": "digital",
+    "type": "toggle",
+    "pin": 16
+  },
+  {
+    "name": "Air DHT22",
+    "driver": "DHT22",
+    "type": "value",
+    "pin": 12
+  }
+
+]

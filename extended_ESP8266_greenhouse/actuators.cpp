@@ -21,17 +21,25 @@ void writeActuator(SensorDriver driver, uint8_t pin, bool level) {
             break;
     }
 }
-
-/*
-// Example PWM scaffold
-void writeActuatorPWM(SensorDriver driver, uint8_t pin, uint8_t duty, bool activeLow) {
+void writeActuatorPWM(SensorDriver driver, uint8_t pin, float dutyPercent) {
     switch (driver) {
-        case SensorDriver::Digital:
-        // ESP8266: analogWrite(pin, activeLow ? (255 - duty) : duty);
-        // Ensure pin supports PWM and is configured.
-        break;
+        case SensorDriver::Digital: {
+            if (!gPinInit[pin]) {
+                pinMode(pin, OUTPUT);
+                gPinInit[pin] = true;
+            }
+
+            // Constrain percentage 0.0 - 100.0
+            if (dutyPercent < 0.0f) dutyPercent = 0.0f;
+            if (dutyPercent > 100.0f) dutyPercent = 100.0f;
+
+            // Map 0-100% to 0-1023 (ESP8266 default PWM range)
+            int duty = (int)((dutyPercent / 100.0f) * 1023);
+
+            analogWrite(pin, duty);
+            break;
+        }
         default:
-        break;
+            break;
     }
 }
-*/

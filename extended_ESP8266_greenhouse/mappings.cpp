@@ -68,9 +68,17 @@ bool loadMappings() {
 
     if (b.writeDriver == SensorDriver::Digital && b.writePin != NO_PIN) {
       pinMode(b.writePin, OUTPUT);
-      const bool offLevel = b.activeLow ? HIGH : LOW;
-      digitalWrite(b.writePin, offLevel);
-      Serial.printf("[MAP] Init actuator pin %u OFF (activeLow=%d)\n", b.writePin, b.activeLow);
+      // MODIFIED: Only do digital init if mode is Binary
+      if (b.outputMode == OutputMode::Binary) {
+          const bool offLevel = b.activeLow ? HIGH : LOW;
+          digitalWrite(b.writePin, offLevel);
+          Serial.printf("[MAP] Init actuator pin %u OFF (activeLow=%d)\n", b.writePin, b.activeLow);
+      }
+      // NEW: Init PWM pins to 0
+      else if (b.outputMode == OutputMode::PWM) {
+          analogWrite(b.writePin, 0);
+          Serial.printf("[MAP] Init actuator pin %u PWM 0%%\n", b.writePin);
+      }
     }
 
     bindings.push_back(b);

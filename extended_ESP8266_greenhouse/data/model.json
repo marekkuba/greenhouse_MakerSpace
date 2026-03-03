@@ -1,0 +1,79 @@
+{
+  "id": 1,
+  "name": "My Smart Greenhouse",
+  "location": "Home",
+  "ipAddress": "0.0.0.0",
+  "status": "ON",
+  "zones": [
+    {
+      "id": 1,
+      "name": "Main Zone",
+      "parameters": [
+        {
+          "id": 101,
+          "name": "temperature",
+          "mutable": true,
+          "currentValue": 0,
+          "requestedValue": 25,
+          "min": 0,
+          "max": 50,
+          "unit": "C",
+          "parameterType": "Value"
+        },
+        {
+          "id": 102,
+          "name": "humidity",
+          "mutable": true,
+          "currentValue": 0,
+          "requestedValue": 60,
+          "min": 0,
+          "max": 100,
+          "unit": "%",
+          "parameterType": "Value"
+        },
+        {
+          "id": 103,
+          "name": "light",
+          "mutable": true,
+          "currentValue": 0,
+          "requestedValue": 0,
+          "parameterType": "Toggle"
+        }
+      ],
+      "flowerpots": [
+        {
+          "id": 1,
+          "name": "Flowerpot 1",
+          "parameters": [
+            {
+              "id": 201,
+              "name": "soil_moisture",
+              "mutable": false,
+              "currentValue": 0,
+              "min": 0,
+              "max": 1024,
+              "unit": "raw",
+              "parameterType": "Value"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Flowerpot 2",
+          "parameters": [
+            {
+              "id": 201,
+              "name": "soil_moisture",
+              "mutable": false,
+              "currentValue": 0,
+              "min": 0,
+              "max": 1024,
+              "unit": "raw",
+              "parameterType": "Value"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
