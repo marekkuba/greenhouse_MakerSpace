@@ -6,7 +6,7 @@
 static std::map<uint8_t, bool> gPinInit;
 
 void writeActuator(SensorDriver driver, uint8_t pin, bool level) {
-//    Serial.printf("Writing actuator, Level: %s PIN: %d \n", level ? "high":"low", pin);
+   Serial.printf("[WRITE] digital -> LEVEL: %s PIN: %d \n", level ? "high":"low", pin);
     switch (driver) {
         case SensorDriver::Digital: {
             if (!gPinInit[pin]) {
@@ -35,7 +35,7 @@ void writeActuatorPWM(SensorDriver driver, uint8_t pin, float dutyPercent) {
 
             // Map 0-100% to 0-1023 (ESP8266 default PWM range)
             int duty = (int)((dutyPercent / 100.0f) * 1023);
-
+            Serial.printf("[WRITE] PWM ->  VALUE:%d, PIN:%d \n", duty, pin);
             analogWrite(pin, duty);
             break;
         }

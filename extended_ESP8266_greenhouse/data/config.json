@@ -22,6 +22,11 @@
     "driver": "DHT22",
     "type": "value",
     "pin": 12
+  },
+  {
+    "name":"Humidity sensor",
+    "driver":"DHT22",
+    "type":"value",
+    "pin":12
   }
-
 ]

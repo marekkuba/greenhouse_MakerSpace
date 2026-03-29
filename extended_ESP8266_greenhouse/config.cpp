@@ -17,7 +17,7 @@ void loadAllConfigs() {
 
 void loadConfig() {
     std::string filename = "/config.json";
-    Serial.printf("[INFO] trying to parse %s \n", filename.c_str());
+    // Serial.printf("[INFO] trying to parse %s \n", filename.c_str());
     if (!LittleFS.exists(filename.c_str())) {
         Serial.printf("[ERROR] %s not found \n", filename.c_str());
         return;

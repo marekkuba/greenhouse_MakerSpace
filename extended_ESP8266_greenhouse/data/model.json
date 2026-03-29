@@ -25,7 +25,7 @@
           "name": "humidity",
           "mutable": true,
           "currentValue": 0,
-          "requestedValue": 60,
+          "requestedValue": 6,
           "min": 0,
           "max": 100,
           "unit": "%",
@@ -60,6 +60,102 @@
         {
           "id": 2,
           "name": "Flowerpot 2",
+          "parameters": [
+            {
+              "id": 201,
+              "name": "soil_moisture",
+              "mutable": false,
+              "currentValue": 0,
+              "min": 0,
+              "max": 1024,
+              "unit": "raw",
+              "parameterType": "Value"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Flowerpot 3",
+          "parameters": [
+            {
+              "id": 201,
+              "name": "soil_moisture",
+              "mutable": false,
+              "currentValue": 0,
+              "min": 0,
+              "max": 1024,
+              "unit": "raw",
+              "parameterType": "Value"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "Flowerpot 4",
+          "parameters": [
+            {
+              "id": 201,
+              "name": "soil_moisture",
+              "mutable": false,
+              "currentValue": 0,
+              "min": 0,
+              "max": 1024,
+              "unit": "raw",
+              "parameterType": "Value"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "Flowerpot 5",
+          "parameters": [
+            {
+              "id": 201,
+              "name": "soil_moisture",
+              "mutable": false,
+              "currentValue": 0,
+              "min": 0,
+              "max": 1024,
+              "unit": "raw",
+              "parameterType": "Value"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "name": "Flowerpot 6",
+          "parameters": [
+            {
+              "id": 201,
+              "name": "soil_moisture",
+              "mutable": false,
+              "currentValue": 0,
+              "min": 0,
+              "max": 1024,
+              "unit": "raw",
+              "parameterType": "Value"
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "name": "Flowerpot 7",
+          "parameters": [
+            {
+              "id": 201,
+              "name": "soil_moisture",
+              "mutable": false,
+              "currentValue": 0,
+              "min": 0,
+              "max": 1024,
+              "unit": "raw",
+              "parameterType": "Value"
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "name": "Flowerpot 8",
           "parameters": [
             {
               "id": 201,

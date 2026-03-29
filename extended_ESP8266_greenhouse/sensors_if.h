@@ -40,9 +40,9 @@ class AnalogSensor : public ISensor {
 public:
     explicit AnalogSensor(uint8_t pin) : _pin(pin) {}
     bool read(const String&, float& out) override {
-//        Serial.printf("[READ] read from analog sensor\n");
         out = analogRead(_pin);
         _lastRead = millis();
+        Serial.printf("[READ] analog -> Value: %d Pin: %d\n", out, _pin);
         return true;
     }
     unsigned long lastReadMs() const override { return _lastRead; }
@@ -58,6 +58,8 @@ public:
     bool read(const String&, float& out) override {
 //    Serial.printf("[READ] read from digital sensor\n");
         out = digitalRead(_pin);
+        Serial.printf("[READ] digital -> Value: %d Pin: %d\n", out, _pin);
+
         _lastRead = millis();
         return true;
     }
@@ -93,7 +95,7 @@ class DHT22Sensor : public ISensor {
                    if (!isnan(h)) _hum = h;
 
                    // Log only when we actually attempt a hardware read
-                   Serial.printf("[READ] DHT22 Hardware Poll -> Temp: %.2f, Hum: %.2f\n", t, h);
+                   Serial.printf("[READ] DHT22 -> Temp: %.2f, Hum: %.2f\n", _temp, _hum);
 
                    _lastSample = now;
                }
@@ -101,7 +103,9 @@ class DHT22Sensor : public ISensor {
                // Output whatever valid data we have cached (or NAN if we haven't got a good read yet)
                if (paramName.equalsIgnoreCase("humidity") ||
                    paramName.equalsIgnoreCase("air_humidity")) {
+
                    out = _hum;
+
                } else {
                    out = _temp;
                }
@@ -132,12 +136,13 @@ public:
 
     bool read(const String&, float& out) override {
         // Set selector lines
-//        Serial.printf("[READ] read from MuxAnalog sensor\n");
         for (size_t i = 0; i < _selPins.size(); ++i) {
             digitalWrite(_selPins[i], (_muxChannel >> i) & 0x01);
         }
         delayMicroseconds(5); // let lines settle after changing selectors
+        // _mainPin = 17;
         out = analogRead(_mainPin);
+        Serial.printf("[READ] Multiplexer -> Value: %.2f Pin: %d, Channel: %d\n", out, _mainPin, _muxChannel);
         _lastRead = millis();
         return true;
     }

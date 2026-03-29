@@ -1,5 +1,14 @@
 [
   {
+  "scope": "zone",
+  "zoneId":1,
+  "paramName": "humidity",
+  "writeDriver": "digital",
+  "writePin": 13,
+  "outputMode": "pwm",
+  "direction": "decrease"
+},
+ {
     "scope": "zone",
     "zoneId": 1,
     "paramName": "temperature",
@@ -59,5 +68,90 @@
     "mapInMax": 0.0,
     "mapOutMin": 0.0,
     "mapOutMax": 100.0
+  },
+    {
+    "scope": "flowerpot",
+    "zoneId": 1,
+    "flowerpotId": 3,
+    "paramName": "soil_moisture",
+    "readDriver": "muxAnalog",
+    "readPin": 17,
+    "muxChannel": 2,
+    "muxSelPins": [14, 4, 5],
+    "mapInMin": 1024.0,
+    "mapInMax": 0.0,
+    "mapOutMin": 0.0,
+    "mapOutMax": 100.0
+  },
+    {
+    "scope": "flowerpot",
+    "zoneId": 1,
+    "flowerpotId": 4,
+    "paramName": "soil_moisture",
+    "readDriver": "muxAnalog",
+    "readPin": 17,
+    "muxChannel": 3,
+    "muxSelPins": [14, 4, 5],
+    "mapInMin": 1024.0,
+    "mapInMax": 0.0,
+    "mapOutMin": 0.0,
+    "mapOutMax": 100.0
+  },
+    {
+    "scope": "flowerpot",
+    "zoneId": 1,
+    "flowerpotId": 5,
+    "paramName": "soil_moisture",
+    "readDriver": "muxAnalog",
+    "readPin": 17,
+    "muxChannel": 4,
+    "muxSelPins": [14, 4, 5],
+    "mapInMin": 1024.0,
+    "mapInMax": 0.0,
+    "mapOutMin": 0.0,
+    "mapOutMax": 100.0
+  },
+    {
+    "scope": "flowerpot",
+    "zoneId": 1,
+    "flowerpotId": 6,
+    "paramName": "soil_moisture",
+    "readDriver": "muxAnalog",
+    "readPin": 17,
+    "muxChannel": 5,
+    "muxSelPins": [14, 4, 5],
+    "mapInMin": 1024.0,
+    "mapInMax": 0.0,
+    "mapOutMin": 0.0,
+    "mapOutMax": 100.0
+  },
+    {
+    "scope": "flowerpot",
+    "zoneId": 1,
+    "flowerpotId": 7,
+    "paramName": "soil_moisture",
+    "readDriver": "muxAnalog",
+    "readPin": 17,
+    "muxChannel": 6,
+    "muxSelPins": [14, 4, 5],
+    "mapInMin": 1024.0,
+    "mapInMax": 0.0,
+    "mapOutMin": 0.0,
+    "mapOutMax": 100.0
+  },
+    {
+    "scope": "flowerpot",
+    "zoneId": 1,
+    "flowerpotId": 8,
+    "paramName": "soil_moisture",
+    "readDriver": "muxAnalog",
+    "readPin": 17,
+    "muxChannel": 7,
+    "muxSelPins": [14, 4, 5],
+    "mapInMin": 1024.0,
+    "mapInMax": 0.0,
+    "mapOutMin": 0.0,
+    "mapOutMax": 100.0
   }
+
 ]

@@ -16,8 +16,8 @@ String getStatusTopic(String greenhouseIpAddress) {
 }
 
 void connectToMqtt() {
-    Serial.println("[MQTT] Attempting connection...");
-    Serial.printf("[MQTT] Broker: %s:%d\n", netConfig.mqtt_host.toString().c_str(), netConfig.mqtt_port);
+    // Serial.println("[MQTT] Attempting connection...");
+    // Serial.printf("[MQTT] Broker: %s:%d\n", netConfig.mqtt_host.toString().c_str(), netConfig.mqtt_port);
     mqttClient.connect();
 }
 
@@ -27,10 +27,10 @@ void onMqttConnect(bool sessionPresent) {
 }
 
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
-  Serial.printf("[MQTT] Disconnected! Reason: %d\n", (int)reason);
+  // Serial.printf("[MQTT] Disconnected! Reason: %d\n", (int)reason);
 
   if (WiFi.isConnected()) {
-    Serial.println("[MQTT] Reconnecting in 5s...");
+    // Serial.println("[MQTT] Reconnecting in 5s...");
     mqttReconnectTimer.once(5, connectToMqtt);
   }
 }

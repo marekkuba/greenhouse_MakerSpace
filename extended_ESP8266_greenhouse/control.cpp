@@ -33,7 +33,7 @@ void resolveBindings() {
     activeBindings.clear();
     gAct.clear();
 
-    Serial.println(F("[CTRL] Resolving Bindings..."));
+    // Serial.println(F("[CTRL] Resolving Bindings..."));
 
     for (const auto &b : bindings) {
         Parameter* p = findParameter(b);
@@ -68,6 +68,7 @@ void resolveBindings() {
 // ---------------------------------------------------------
 void readSensors() {
     // Iterate only through bindings that have been resolved
+    // Serial.printf("Number of active bindings: %zu\n", activeBindings.size());
     for (auto &rb : activeBindings) {
         ParamBinding &b = rb.config;
         Parameter* p = rb.target; // INSTANT ACCESS - No searching
@@ -144,6 +145,7 @@ static void applyLogicAndWrite(ParamBinding &b, Parameter* p, bool wantOn, uint3
 }
 static void applyLogicAndWritePWM(ParamBinding &b, Parameter* p, float targetValue) {
     // Basic write
+    // Serial.println("writePWM");
     writeActuatorPWM(b.writeDriver, b.writePin, targetValue);
 
     // Update model state
@@ -169,6 +171,8 @@ void runControlLogic() {
         if (!p->mutableFlag) continue;
         if (isnan(p->requestedValue)) continue;
         if (b.outputMode == OutputMode::PWM) {
+            // Serial.println("output mode PWM");
+
             float targetPWM = 0.0f;
 
             // Case A: Manual Control (No sensor feedback)
@@ -176,6 +180,7 @@ void runControlLogic() {
             if (b.readPin == NO_PIN) {
                 targetPWM = p->requestedValue;
             }
+
             // Case B: Proportional Control (Sensor feedback exists)
             // Example: As Temp exceeds target, Fan speeds up
             else if (!isnan(p->currentValue)) {
@@ -191,7 +196,8 @@ void runControlLogic() {
                      if (err < 0) targetPWM = -err * gain;
                 }
             }
-
+            //  Serial.printf("[WRITE] PWM %s Current: %.2f, Target: %.2f, Calc PWM: %.2f%%\n", 
+                            //   p->name.c_str(), p->currentValue, p->requestedValue, targetPWM);
             applyLogicAndWritePWM(b, p, targetPWM);
             continue; // Skip the rest of the loop for this binding
         }
