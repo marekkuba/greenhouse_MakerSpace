@@ -139,8 +139,11 @@ public:
         for (size_t i = 0; i < _selPins.size(); ++i) {
             digitalWrite(_selPins[i], (_muxChannel >> i) & 0x01);
         }
-        delayMicroseconds(5); // let lines settle after changing selectors
-        // _mainPin = 17;
+        // 500 µs: MUX switch + high-impedance soil-sensor RC settle time.
+        // Channels 4-7 flip S2 (a full-swing transition) — 5 µs was far too short.
+        delayMicroseconds(500);
+        analogRead(_mainPin);      // dummy read: flush ADC sampling-cap charge from previous channel
+        delayMicroseconds(200);    // extra settle after dummy read
         out = analogRead(_mainPin);
         Serial.printf("[READ] Multiplexer -> Value: %.2f Pin: %d, Channel: %d\n", out, _mainPin, _muxChannel);
         _lastRead = millis();

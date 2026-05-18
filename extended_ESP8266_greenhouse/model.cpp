@@ -30,9 +30,11 @@ bool parseGreenhouseJson(const char* json, size_t len, bool saveToDisk) {
             Serial.println("[MODEL] Error saving configuration!");
         }
     }
-    // B. Memory Allocation (CRITICAL CHANGE)
-        // Use DynamicJsonDocument for large JSONs to use Heap instead of Stack
-        DynamicJsonDocument doc(10240); // 10KB Buffer (adjust as needed)
+    // B. Memory Allocation
+        // Static: allocated once at first call, reused on every subsequent call with clear().
+        // Eliminates repeated 10 KB heap alloc/free that fragment the ESP8266 heap over time.
+        static DynamicJsonDocument doc(10240);
+        doc.clear();
 
         DeserializationError err = deserializeJson(doc, json, len);
         if (err) {
@@ -101,11 +103,20 @@ bool parseGreenhouseJson(const char* json, size_t len, bool saveToDisk) {
 
 void publishModel() {
     Serial.println("[MODEL] Trying to publish model");
-    // 1. Allocate (Use Dynamic for safety on ESP32)
-    DynamicJsonDocument doc(4096);
+    // Static: allocated once, reused every 10 s with clear() to prevent heap fragmentation.
+    static DynamicJsonDocument doc(4096);
+    doc.clear();
 
     // 2. Serialize (Only sending IDs and currentValues to save bandwidth)
     doc["id"] = greenhouse.id;
+
+    // Greenhouse-level parameters
+    JsonArray ghparams = doc.createNestedArray("parameters");
+    for (const auto &p : greenhouse.parameters) {
+        JsonObject o = ghparams.createNestedObject();
+        o["id"]  = p.id;
+        o["val"] = p.currentValue;
+    }
 
     JsonArray zones = doc.createNestedArray("zones");
     for (const auto &z : greenhouse.zones) {

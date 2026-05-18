@@ -17,8 +17,8 @@
 #include "mqtt_helpers.h"
 #include "globals.h"
 
-const long SENSOR_INTERVAL = 10000;  // Read sensors every 2 seconds
-const long CONTROL_INTERVAL = 10000; // Update control logic every 1 second
+const long SENSOR_INTERVAL = 10000;  // Read sensors every 10 seconds
+const long CONTROL_INTERVAL = 10000; // Update control logic every 10 seconds
 
 unsigned long lastSensorRun = 0;
 unsigned long lastControlRun = 0;
@@ -42,30 +42,29 @@ void handleMQTTMessages(){
     if(newModelMessageArrived){
         bool ok = parseGreenhouseJson(newModelMessage.c_str(), newModelMessage.length(), true);
         Serial.printf("[MODEL] Parse %s\n", ok ? "OK" : "FAIL");
+        mqttClient.publish((getBaseTopic(greenhouse.ipAddress)+"/ack/model").c_str(), 0, false, ok ? "ok" : "error");
         newModelMessage="";
         newModelMessageArrived = false;
     }
     if(newConfigMessageArrived){
          if (saveConfigRaw(newConfigMessage.c_str(), newConfigMessage.length())) {
-             //mqttClient.publish((getBaseTopic()+"/status/ack").c_str(), 0, false, "config_saved_rebooting");
+             mqttClient.publish((getBaseTopic(greenhouse.ipAddress)+"/ack/config").c_str(), 0, false, "ok");
              Serial.println("[SYS] Config saved. Reboot flagged.");
              systemRebootNeeded = true;
-         }
-         else {
-             //mqttClient.publish((getBaseTopic()+"/status/error").c_str(), 0, false, "config_invalid_json");
+         } else {
+             mqttClient.publish((getBaseTopic(greenhouse.ipAddress)+"/ack/config").c_str(), 0, false, "error");
          }
          newConfigMessage = "";
          newConfigMessageArrived = false;
      }
     if(newBindingMessageArrived){
         if (saveMappingRaw(newBindingMessage.c_str(), newBindingMessage.length())) {
-                //mqttClient.publish((getBaseTopic()+"/status/ack").c_str(), 0, false, "mapping_saved_rebooting");
-                Serial.println("[SYS] Mapping saved. Reboot flagged.");
-                systemRebootNeeded = true;
+             mqttClient.publish((getBaseTopic(greenhouse.ipAddress)+"/ack/mapping").c_str(), 0, false, "ok");
+             Serial.println("[SYS] Mapping saved. Reboot flagged.");
+             systemRebootNeeded = true;
         } else {
-          //mqttClient.publish((getBaseTopic()+"/status/error").c_str(), 0, false, "mapping_invalid_json");
+            mqttClient.publish((getBaseTopic(greenhouse.ipAddress)+"/ack/mapping").c_str(), 0, false, "error");
         }
-
         newBindingMessage = "";
         newBindingMessageArrived = false;
     }
@@ -105,12 +104,16 @@ void initSerial() {
 }
 
 void setup() {
+  initSerial();
   Serial.println(F("\n\n[BOOT] Starting..."));
   bootTime = millis();
-  initSerial();
-  initFilesystem();
+
+  if (!initFilesystem()) {
+      Serial.println(F("[BOOT] FATAL: filesystem mount failed — halting"));
+      while (true) { delay(1000); }
+  }
+
   loadAllConfigs();
-  Serial.println("[SERIAL] Initialization complete");
 
   registerWifiHandlers();
   registerMqttHandlers();
@@ -120,6 +123,5 @@ void setup() {
 
   Serial.println("[BOOT] trying to restore model");
   loadModel();
-  resolveBindings();
-
+  // resolveBindings() is already called inside parseGreenhouseJson via loadModel()
 }

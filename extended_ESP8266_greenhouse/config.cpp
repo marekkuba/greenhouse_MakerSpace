@@ -52,7 +52,6 @@ void loadConfig() {
 
         // Initialise actuators immediately
          if (dev.driver != SensorDriver::Unknown && dev.type == DeviceType::Value) {
-              Serial.printf("[CONFIG] TEST\n");
              float dummy;
              Sensors.read(dev.driver, dev.pin, "", dummy);
              Serial.printf("[CONFIG] Pre-initialised %s sensor on pin %u\n",

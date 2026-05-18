@@ -25,7 +25,7 @@ bool validateAndSave(const char* filename, const char* jsonString, size_t len) {
     // 1. Validation: Check if it is valid JSON before saving
     // We use a small dynamic document just to check syntax.
     // We don't need to keep the data, just see if it parses.
-    DynamicJsonDocument doc(1024);
+    DynamicJsonDocument doc(4096);
     DeserializationError error = deserializeJson(doc, jsonString, DeserializationOption::NestingLimit(10));
 
     if (error) {

@@ -44,15 +44,22 @@ void onMqttMessage(char* topic, char* payload,
                    size_t len, size_t idx, size_t total) {
 
   // 1. If this is the start of a new message (idx == 0), reset the buffer
+  static bool rejecting = false;
   if (idx == 0) {
+      if (total > 16384) {
+          Serial.printf("[MQTT] Oversized message (%u bytes) rejected\n", (unsigned)total);
+          rejecting = true;
+          return;
+      }
+      rejecting = false;
       incomingPayloadBuffer = "";
-      incomingPayloadBuffer.reserve(total); // Reserve memory to prevent fragmentation
+      incomingPayloadBuffer.reserve(total);
   }
 
-  // 2. Append the current chunk to the buffer
-  for (size_t i = 0; i < len; i++) {
-      incomingPayloadBuffer += payload[i];
-  }
+  if (rejecting) return;
+
+  // 2. Append the current chunk — bulk concat avoids per-character reallocation
+  incomingPayloadBuffer.concat(payload, (unsigned int)len);
 
   // 3. Only process if we have received the TOTAL message length
   if (idx + len == total) {
