@@ -16,6 +16,7 @@ float mapFloat(float x, float in_min, float in_max, float out_min, float out_max
 struct ActState {
     bool on = false;
     uint32_t lastChangeMs = 0;
+    float lastDuty = 0.0f;
 };
 static std::map<uint16_t, ActState> gAct;
 
@@ -136,7 +137,6 @@ static void applyLogicAndWrite(ParamBinding &b, Parameter* p, bool wantOn, uint3
     writeActuator(b.writeDriver, b.writePin, physicalLevel);
 
     // --- Model Feedback ---
-    // Update the model so the UI knows if the heater is actually running
     p->actuatorState = st.on;
 
     // Special case: For Toggle buttons, the actuator state IS the value
@@ -151,7 +151,7 @@ static void applyLogicAndWritePWM(ParamBinding &b, Parameter* p, float targetVal
 
     // Update model state
     // For PWM, "actuatorState" (bool) is true if value > 0
-    p->actuatorState = (targetValue > 1.0f);
+    p->actuatorState = (targetValue > 0.0f);
 
     // For manual control (ReadPin == NO_PIN), the currentValue IS the requestedValue
     if (b.readPin == NO_PIN) {
@@ -171,6 +171,12 @@ void runControlLogic() {
         // Strict check: if parameter is immutable or has no target, skip
         if (!p->mutableFlag) continue;
         if (isnan(p->requestedValue)) continue;
+
+        // Clamp requestedValue to the model-declared safe range so a malicious or
+        // erroneous server update cannot lock an actuator on indefinitely.
+        if (!isnan(p->min) && p->requestedValue < p->min) p->requestedValue = p->min;
+        if (!isnan(p->max) && p->requestedValue > p->max) p->requestedValue = p->max;
+
         if (b.outputMode == OutputMode::PWM) {
             // Serial.println("output mode PWM");
 
@@ -220,7 +226,11 @@ void runControlLogic() {
         if (isnan(p->currentValue)) continue;
 
         float err = p->requestedValue - p->currentValue;
-        bool wantOn = p->actuatorState; // Default: Maintain current state (Deadband)
+
+        // Read per-actuator state from gAct so deadband is correct even when multiple
+        // bindings share the same parameter (e.g. fan + humidifier both on "humidity").
+        uint16_t actKey = makeActKey(b.writeDriver, b.writePin);
+        bool wantOn = gAct.count(actKey) ? gAct[actKey].on : false;
 
         if (b.direction == Direction::Increase) {
             // Example: HEATER

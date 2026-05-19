@@ -8,7 +8,8 @@ Scope stringToScope(const String& text) {
     if (text.equalsIgnoreCase("greenhouse")) return Scope::Greenhouse;
     if (text.equalsIgnoreCase("zone")) return Scope::Zone;
     if (text.equalsIgnoreCase("flowerpot")) return Scope::Flowerpot;
-    return Scope::Greenhouse; // Default
+    Serial.printf("[MAP] Unknown scope '%s' — defaulting to Greenhouse\n", text.c_str());
+    return Scope::Greenhouse;
 }
 
 bool loadMappings() {
@@ -89,14 +90,14 @@ bool loadMappings() {
 
 Parameter* findParameter(const ParamBinding& b) {
   if (b.scope == Scope::Greenhouse) {
-    for (auto &p : greenhouse.parameters) if (p.name == b.paramName) return &p;
+    for (auto &p : greenhouse.parameters) if (p.name.equalsIgnoreCase(b.paramName)) return &p;
   } else if (b.scope == Scope::Zone) {
     for (auto &z : greenhouse.zones) if (z.id == b.zoneId)
-      for (auto &p : z.parameters) if (p.name == b.paramName) return &p;
+      for (auto &p : z.parameters) if (p.name.equalsIgnoreCase(b.paramName)) return &p;
   } else if (b.scope == Scope::Flowerpot) {
     for (auto &z : greenhouse.zones) if (z.id == b.zoneId)
       for (auto &fp : z.flowerpots) if (fp.id == b.flowerpotId)
-        for (auto &p : fp.parameters) if (p.name == b.paramName) return &p;
+        for (auto &p : fp.parameters) if (p.name.equalsIgnoreCase(b.paramName)) return &p;
   }
   return nullptr;
 }

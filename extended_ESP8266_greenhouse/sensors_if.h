@@ -42,7 +42,7 @@ public:
     bool read(const String&, float& out) override {
         out = analogRead(_pin);
         _lastRead = millis();
-        Serial.printf("[READ] analog -> Value: %d Pin: %d\n", out, _pin);
+        Serial.printf("[READ] analog -> Value: %d Pin: %d\n", (int)out, _pin);
         return true;
     }
     unsigned long lastReadMs() const override { return _lastRead; }
@@ -58,7 +58,7 @@ public:
     bool read(const String&, float& out) override {
 //    Serial.printf("[READ] read from digital sensor\n");
         out = digitalRead(_pin);
-        Serial.printf("[READ] digital -> Value: %d Pin: %d\n", out, _pin);
+        Serial.printf("[READ] digital -> Value: %d Pin: %d\n", (int)out, _pin);
 
         _lastRead = millis();
         return true;

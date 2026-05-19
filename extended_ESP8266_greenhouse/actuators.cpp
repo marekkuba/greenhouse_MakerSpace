@@ -17,7 +17,7 @@ void writeActuator(SensorDriver driver, uint8_t pin, bool level) {
             break;
         }
         default:
-            // Unsupported actuator backend
+            Serial.printf("[WARN] writeActuator: unsupported driver %d on pin %u\n", (int)driver, pin);
             break;
     }
 }
@@ -40,6 +40,7 @@ void writeActuatorPWM(SensorDriver driver, uint8_t pin, float dutyPercent) {
             break;
         }
         default:
+            Serial.printf("[WARN] writeActuatorPWM: unsupported driver %d on pin %u\n", (int)driver, pin);
             break;
     }
 }
