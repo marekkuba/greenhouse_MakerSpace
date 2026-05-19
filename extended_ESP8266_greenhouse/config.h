@@ -10,6 +10,9 @@ struct NetworkConfig {
   String wifi_password;
   IPAddress mqtt_host;
   uint16_t mqtt_port;
+  String mqtt_username;
+  String mqtt_password;
+  String device_ip;
 };
 
 void loadAllConfigs();

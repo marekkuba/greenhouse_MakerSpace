@@ -3,8 +3,8 @@
 
 // This is the Optimized Object
 struct RuntimeBinding {
-    ParamBinding config;      // Copy of the configuration (Pins, logic type, etc.)
-    Parameter* target;   // Direct memory address of the Parameter in the Model
+    const ParamBinding* config;  // Points into the global bindings vector — no copy
+    Parameter* target;           // Direct memory address of the Parameter in the Model
 };
 
 // The list that the loop will actually use

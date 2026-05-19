@@ -42,28 +42,28 @@ void handleMQTTMessages(){
     if(newModelMessageArrived){
         bool ok = parseGreenhouseJson(newModelMessage.c_str(), newModelMessage.length(), true);
         Serial.printf("[MODEL] Parse %s\n", ok ? "OK" : "FAIL");
-        mqttClient.publish((getBaseTopic(greenhouse.ipAddress)+"/ack/model").c_str(), 0, false, ok ? "ok" : "error");
+        mqttClient.publish((getBaseTopic(netConfig.device_ip)+"/ack/model").c_str(), 0, false, ok ? "ok" : "error");
         newModelMessage="";
         newModelMessageArrived = false;
     }
     if(newConfigMessageArrived){
          if (saveConfigRaw(newConfigMessage.c_str(), newConfigMessage.length())) {
-             mqttClient.publish((getBaseTopic(greenhouse.ipAddress)+"/ack/config").c_str(), 0, false, "ok");
+             mqttClient.publish((getBaseTopic(netConfig.device_ip)+"/ack/config").c_str(), 0, false, "ok");
              Serial.println("[SYS] Config saved. Reboot flagged.");
              systemRebootNeeded = true;
          } else {
-             mqttClient.publish((getBaseTopic(greenhouse.ipAddress)+"/ack/config").c_str(), 0, false, "error");
+             mqttClient.publish((getBaseTopic(netConfig.device_ip)+"/ack/config").c_str(), 0, false, "error");
          }
          newConfigMessage = "";
          newConfigMessageArrived = false;
      }
     if(newBindingMessageArrived){
         if (saveMappingRaw(newBindingMessage.c_str(), newBindingMessage.length())) {
-             mqttClient.publish((getBaseTopic(greenhouse.ipAddress)+"/ack/mapping").c_str(), 0, false, "ok");
+             mqttClient.publish((getBaseTopic(netConfig.device_ip)+"/ack/mapping").c_str(), 0, false, "ok");
              Serial.println("[SYS] Mapping saved. Reboot flagged.");
              systemRebootNeeded = true;
         } else {
-            mqttClient.publish((getBaseTopic(greenhouse.ipAddress)+"/ack/mapping").c_str(), 0, false, "error");
+            mqttClient.publish((getBaseTopic(netConfig.device_ip)+"/ack/mapping").c_str(), 0, false, "error");
         }
         newBindingMessage = "";
         newBindingMessageArrived = false;

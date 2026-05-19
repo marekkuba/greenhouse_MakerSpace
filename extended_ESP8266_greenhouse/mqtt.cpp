@@ -22,7 +22,7 @@ void connectToMqtt() {
 }
 
 void onMqttConnect(bool sessionPresent) {
-  mqttClient.subscribe(getSubscriptionTopic(greenhouse.ipAddress).c_str(), 1);
+  mqttClient.subscribe(getSubscriptionTopic(netConfig.device_ip).c_str(), 1);
   Serial.println("[MQTT] Connected!");
 }
 
@@ -66,21 +66,21 @@ void onMqttMessage(char* topic, char* payload,
       String topicStr = String(topic);
 
       // Use the global 'incomingPayloadBuffer' instead of the partial 'payload'
-      if (topicStr.startsWith(getSubscriptionTopic(greenhouse.ipAddress).c_str())) {
+      if (topicStr.startsWith((getBaseTopic(netConfig.device_ip)+"/set/").c_str())) {
 
         if(topicStr.endsWith("/model")){
            Serial.println("[MQTT] Received New Model File (Full)");
-            newModelMessage = incomingPayloadBuffer;
+            newModelMessage = std::move(incomingPayloadBuffer);
             newModelMessageArrived = true;
         }
         else if(topicStr.endsWith("/config")){
            Serial.println("[MQTT] Received New Config File (Full)");
-           newConfigMessage = incomingPayloadBuffer;
+           newConfigMessage = std::move(incomingPayloadBuffer);
            newConfigMessageArrived = true;
         }
         else if(topicStr.endsWith("/mapping")){
            Serial.println("[MQTT] Received New Mapping File (Full)");
-           newBindingMessage = incomingPayloadBuffer;
+           newBindingMessage = std::move(incomingPayloadBuffer);
            newBindingMessageArrived = true;
         }
       }
@@ -96,6 +96,9 @@ void registerMqttHandlers() {
     mqttClient.onMessage(onMqttMessage);
     mqttClient.setServer(netConfig.mqtt_host, netConfig.mqtt_port);
     mqttClient.setKeepAlive(60);
+    if (!netConfig.mqtt_username.isEmpty()) {
+        mqttClient.setCredentials(netConfig.mqtt_username.c_str(), netConfig.mqtt_password.c_str());
+    }
 }
 
 void publishTelemetryJson(const String& jsonPayload, String greenhouseIpAddress) {

@@ -3,14 +3,7 @@
 #include "model.h"
 
 bool saveModelRaw(const char* jsonString, size_t len) {
-    // Validate before writing — a corrupt model.json bricks the device on next boot.
-    DynamicJsonDocument doc(10240);
-    DeserializationError error = deserializeJson(doc, jsonString, DeserializationOption::NestingLimit(10));
-    if (error) {
-        Serial.printf("[FS] Model JSON validation failed: %s\n", error.c_str());
-        return false;
-    }
-
+    // Caller (parseGreenhouseJson) already validated the JSON by parsing it successfully.
     File f = LittleFS.open("/model.json", "w");
     if (!f) return false;
     size_t written = f.write((const uint8_t*)jsonString, len);

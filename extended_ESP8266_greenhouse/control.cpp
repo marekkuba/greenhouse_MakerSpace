@@ -42,7 +42,7 @@ void resolveBindings() {
 
         if (p) {
             RuntimeBinding rb;
-            rb.config = b;
+            rb.config = &b;
             rb.target = p;
             activeBindings.push_back(rb);
 
@@ -72,7 +72,7 @@ void readSensors() {
     // Iterate only through bindings that have been resolved
     // Serial.printf("Number of active bindings: %zu\n", activeBindings.size());
     for (auto &rb : activeBindings) {
-        ParamBinding &b = rb.config;
+        const ParamBinding &b = *rb.config;
         Parameter* p = rb.target; // INSTANT ACCESS - No searching
 
         // strict check: if no sensor assigned, skip
@@ -106,7 +106,7 @@ void readSensors() {
 // ---------------------------------------------------------
 
 // Internal helper to apply Hysteresis/Timing logic and write to hardware
-static void applyLogicAndWrite(ParamBinding &b, Parameter* p, bool wantOn, uint32_t now) {
+static void applyLogicAndWrite(const ParamBinding &b, Parameter* p, bool wantOn, uint32_t now) {
     const uint16_t key = makeActKey(b.writeDriver, b.writePin);
     ActState &st = gAct[key]; // Reference to static state
 
@@ -144,7 +144,7 @@ static void applyLogicAndWrite(ParamBinding &b, Parameter* p, bool wantOn, uint3
         p->currentValue = st.on ? 1.0 : 0.0;
     }
 }
-static void applyLogicAndWritePWM(ParamBinding &b, Parameter* p, float targetValue) {
+static void applyLogicAndWritePWM(const ParamBinding &b, Parameter* p, float targetValue) {
     // Basic write
     // Serial.println("writePWM");
     writeActuatorPWM(b.writeDriver, b.writePin, targetValue);
@@ -162,7 +162,7 @@ void runControlLogic() {
     uint32_t now = millis();
 
     for (auto &rb : activeBindings) {
-        ParamBinding &b = rb.config;
+        const ParamBinding &b = *rb.config;
         Parameter* p = rb.target; // INSTANT ACCESS
 
         // Strict check: if no actuator assigned, skip

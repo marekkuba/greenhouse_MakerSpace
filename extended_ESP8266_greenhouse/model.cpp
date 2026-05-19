@@ -20,9 +20,20 @@ void deserializeParameter(const JsonObject& src, Parameter& dst) {
 }
 bool parseGreenhouseJson(const char* json, size_t len, bool saveToDisk) {
 
-    // A. Persistence Layer Call
-    // We only save if this came from the network (saveToDisk = true).
-    // If we are booting up and loading FROM disk, we pass false to avoid loop.
+    // B. Parse first — the static doc validates JSON without touching flash.
+    // Static: allocated once at first call, reused on every subsequent call with clear().
+    // Eliminates repeated 10 KB heap alloc/free that fragment the ESP8266 heap over time.
+    static DynamicJsonDocument doc(10240);
+    doc.clear();
+
+    DeserializationError err = deserializeJson(doc, json, len);
+    if (err) {
+        Serial.printf("[MODEL] JSON parse error: %s\n", err.c_str());
+        return false;
+    }
+
+    // A. Persistence — only save after successful parse so a corrupt payload never reaches flash.
+    // If we are booting up and loading FROM disk, saveToDisk=false to avoid a write loop.
     if (saveToDisk) {
         if(saveModelRaw(json, len)) {
             Serial.println("[MODEL] New configuration saved to flash.");
@@ -30,17 +41,6 @@ bool parseGreenhouseJson(const char* json, size_t len, bool saveToDisk) {
             Serial.println("[MODEL] Error saving configuration!");
         }
     }
-    // B. Memory Allocation
-        // Static: allocated once at first call, reused on every subsequent call with clear().
-        // Eliminates repeated 10 KB heap alloc/free that fragment the ESP8266 heap over time.
-        static DynamicJsonDocument doc(10240);
-        doc.clear();
-
-        DeserializationError err = deserializeJson(doc, json, len);
-        if (err) {
-            Serial.printf("[MODEL] JSON parse error: %s\n", err.c_str());
-            return false;
-        }
     // C. Updating Structs
         Greenhouse newGh;
         newGh.id        = doc["id"] | 0;
@@ -152,7 +152,7 @@ void publishModel() {
 
     // 4. Hand off to MQTT layer
     // The model says: "Here is my data, send it."
-    publishTelemetryJson(output, greenhouse.ipAddress);
+    publishTelemetryJson(output, netConfig.device_ip);
 
     ///TODO: zastanowic sie, czy powinnismy zapisywac ten model tutaj
 //    saveModelRaw(output.c_str(), output.length());

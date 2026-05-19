@@ -88,6 +88,15 @@ void loadNetworkConfig() {
   netConfig.wifi_password = doc["wifi_password"] | "";
   String mqttHostStr      = doc["mqtt_host"] | "";
   netConfig.mqtt_port     = doc["mqtt_port"] | 1883;
+  netConfig.mqtt_username = doc["mqtt_username"] | "";
+  netConfig.mqtt_password = doc["mqtt_password"] | "";
+  netConfig.device_ip     = doc["device_ip"]     | "";
+  if (netConfig.mqtt_username.isEmpty()) {
+      Serial.println("[CONFIG] WARN: No MQTT credentials configured — broker is open");
+  }
+  if (netConfig.device_ip.isEmpty()) {
+      Serial.println("[CONFIG] WARN: No device_ip set — first-boot provisioning will fail");
+  }
 
   int a=0,b=0,c=0,d=0;
   if (sscanf(mqttHostStr.c_str(), "%d.%d.%d.%d", &a,&b,&c,&d) == 4
