@@ -41,7 +41,7 @@ void handleReboot() {
 void handleMQTTMessages(){
     if(newModelMessageArrived){
         bool ok = parseGreenhouseJson(newModelMessage.c_str(), newModelMessage.length(), true);
-        Serial.printf("[MODEL] Parse %s\n", ok ? "OK" : "FAIL");
+        Serial.printf("[MODEL] Parse %s — free heap: %u bytes\n", ok ? "OK" : "FAIL", ESP.getFreeHeap());
         mqttClient.publish((getBaseTopic(netConfig.device_ip)+"/ack/model").c_str(), 0, false, ok ? "ok" : "error");
         newModelMessage="";
         newModelMessageArrived = false;
@@ -121,6 +121,7 @@ void setup() {
   Serial.println("[BOOT] Initialization complete");
   setupWifi();
 
+  Serial.printf("[MEM] Free heap after init: %u bytes\n", ESP.getFreeHeap());
   Serial.println("[BOOT] trying to restore model");
   loadModel();
   // resolveBindings() is already called inside parseGreenhouseJson via loadModel()

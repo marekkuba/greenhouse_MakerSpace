@@ -46,7 +46,7 @@ void onMqttMessage(char* topic, char* payload,
   // 1. If this is the start of a new message (idx == 0), reset the buffer
   static bool rejecting = false;
   if (idx == 0) {
-      if (total > 16384) {
+      if (total > 8192) {
           Serial.printf("[MQTT] Oversized message (%u bytes) rejected\n", (unsigned)total);
           rejecting = true;
           return;
