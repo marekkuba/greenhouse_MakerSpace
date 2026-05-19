@@ -29,7 +29,7 @@ void loadConfig() {
         return;
     }
 
-    JsonDocument doc;
+    DynamicJsonDocument doc(2048);
     DeserializationError err = deserializeJson(doc, f);
     f.close();
     if (err) {
@@ -74,8 +74,7 @@ void loadNetworkConfig() {
     return;
    }
 
-  // FIX: strumieniowo [6]
-  JsonDocument doc;
+  DynamicJsonDocument doc(512);
   auto err = deserializeJson(doc, f);
   f.close();
   if (err) {

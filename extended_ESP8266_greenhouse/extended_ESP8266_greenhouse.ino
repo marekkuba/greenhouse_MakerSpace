@@ -1,3 +1,20 @@
+#include <AsyncPrinter.h>
+#include <DebugPrintMacros.h>
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncTCPbuffer.h>
+#include <SyncClient.h>
+#include <async_config.h>
+#include <tcp_axtls.h>
+
+#include <DHT.h>
+#include <DHT_U.h>
+
+#include <AsyncMqttClient.h>
+#include <AsyncMqttClient.hpp>
+
+#include <ArduinoJson.h>
+#include <ArduinoJson.hpp>
+
 #include <LittleFS.h>
 #include <ArduinoJson.h>
 #include <AsyncMqttClient.h>

@@ -2,6 +2,7 @@
 #include "mqtt.h"
 #include "persistence.h"
 #include "control.h"
+#include "globals.h"
 #include <Arduino.h>
 #include <WString.h>
 
