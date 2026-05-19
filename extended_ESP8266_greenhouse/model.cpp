@@ -116,7 +116,9 @@ void publishModel() {
     for (const auto &p : greenhouse.parameters) {
         JsonObject o = ghparams.createNestedObject();
         o["id"]  = p.id;
+        o["name"] = p.name;
         o["val"] = p.currentValue;
+        o["req"] = p.requestedValue;
     }
 
     JsonArray zones = doc.createNestedArray("zones");
@@ -124,15 +126,15 @@ void publishModel() {
         JsonObject zj = zones.createNestedObject();
         zj["id"] = z.id;
 
-        // Zone Params
         JsonArray zparams = zj.createNestedArray("parameters");
         for (const auto &p : z.parameters) {
             JsonObject o = zparams.createNestedObject();
             o["id"]  = p.id;
+            o["name"] = p.name;
             o["val"] = p.currentValue;
+            o["req"] = p.requestedValue;
         }
 
-        // Flowerpots
         JsonArray fps = zj.createNestedArray("flowerpots");
         for (const auto &fp : z.flowerpots) {
             JsonObject fpj = fps.createNestedObject();
@@ -142,7 +144,9 @@ void publishModel() {
             for (const auto &p : fp.parameters) {
                 JsonObject o = fpparams.createNestedObject();
                 o["id"]  = p.id;
+                o["name"] = p.name;
                 o["val"] = p.currentValue;
+                o["req"] = p.requestedValue;
             }
         }
     }
