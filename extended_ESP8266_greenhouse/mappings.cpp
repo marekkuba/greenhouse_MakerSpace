@@ -37,8 +37,24 @@ bool loadMappings() {
     b.zoneId = o["zoneId"] | 0;
     b.flowerpotId = o["flowerpotId"] | 0;
     b.paramName = o["paramName"] | "";
-    b.readDriver = parseSensorDriver(o["readDriver"].as<String>());
-    b.readPin = o["readPin"] | NO_PIN;
+
+    // Resolve the read sensor from the device inventory by id. The device is
+    // the single source of truth for driver + pin; an unknown/zero id leaves
+    // the sensor disabled (readPin == NO_PIN), which the control loop skips.
+    b.readDeviceId = o["readDeviceId"] | 0;
+    const DeviceConfig* rd = b.readDeviceId == 0 ? nullptr : findDevice(b.readDeviceId);
+    if (rd) {
+        b.readDriver = rd->driver;
+        b.readPin    = rd->pin;
+    } else {
+        b.readDriver = SensorDriver::Unknown;
+        b.readPin    = NO_PIN;
+        if (b.readDeviceId != 0) {
+            Serial.printf("[MAP] Warning: read device #%u not found for %s; sensor disabled\n",
+                          b.readDeviceId, b.paramName.c_str());
+        }
+    }
+
     b.muxChannel = o["muxChannel"] | 0;
     if (o.containsKey("muxSelPins")) {
         b.muxSelPins.clear();
@@ -46,8 +62,23 @@ bool loadMappings() {
             b.muxSelPins.push_back(v.as<uint8_t>());
         }
     }
-    b.writeDriver = parseSensorDriver(o["writeDriver"].as<String>());
-    b.writePin = o["writePin"] | NO_PIN;
+
+    // Resolve the write actuator from the device inventory by id. Same
+    // contract: unknown/zero id leaves the actuator disabled (writePin ==
+    // NO_PIN) so no GPIO is driven by mistake.
+    b.writeDeviceId = o["writeDeviceId"] | 0;
+    const DeviceConfig* wd = b.writeDeviceId == 0 ? nullptr : findDevice(b.writeDeviceId);
+    if (wd) {
+        b.writeDriver = wd->driver;
+        b.writePin    = wd->pin;
+    } else {
+        b.writeDriver = SensorDriver::Unknown;
+        b.writePin    = NO_PIN;
+        if (b.writeDeviceId != 0) {
+            Serial.printf("[MAP] Warning: write device #%u not found for %s; actuator disabled\n",
+                          b.writeDeviceId, b.paramName.c_str());
+        }
+    }
     b.direction   = parseDirection(o["direction"].as<String>());
     b.hysteresis  = o["hysteresis"] | 0.5;
     b.activeLow   = o["activeLow"]  | false;

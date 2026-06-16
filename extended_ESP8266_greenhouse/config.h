@@ -21,6 +21,7 @@ void loadNetworkConfig();
 
 extern NetworkConfig netConfig;
 struct DeviceConfig {
+  uint16_t id = 0;          // server-assigned stable id (0 = unset)
   String   name;
   SensorDriver   driver;
   DeviceType type;
@@ -30,3 +31,7 @@ struct DeviceConfig {
 };
 
 extern std::vector<DeviceConfig> devices;
+
+// Look up a device in the inventory by its server-assigned id. Returns nullptr
+// if no device with that id is configured.
+const DeviceConfig* findDevice(uint16_t id);

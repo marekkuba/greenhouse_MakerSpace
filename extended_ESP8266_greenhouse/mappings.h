@@ -54,6 +54,12 @@ struct ParamBinding {
     uint32_t flowerpotId = 0;
     String paramName;
 
+    // Device references by id (source of truth; 0 = none). driver/pin below are
+    // resolved from these against the device inventory at load time; the runtime
+    // hot loops use the resolved driver/pin directly.
+    uint16_t readDeviceId = 0;
+    uint16_t writeDeviceId = 0;
+
     SensorDriver readDriver;
     uint8_t      readPin = 0;
     uint8_t muxChannel = 0;

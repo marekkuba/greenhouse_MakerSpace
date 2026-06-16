@@ -15,6 +15,13 @@ void loadAllConfigs() {
     loadMappings();
 }
 
+const DeviceConfig* findDevice(uint16_t id) {
+    for (const auto& d : devices) {
+        if (d.id == id) return &d;
+    }
+    return nullptr;
+}
+
 void loadConfig() {
     std::string filename = "/config.json";
     // Serial.printf("[INFO] trying to parse %s \n", filename.c_str());
@@ -42,6 +49,7 @@ void loadConfig() {
     for (JsonObject obj : doc.as<JsonArray>()) {
 
         DeviceConfig dev;
+        dev.id           = obj["id"]          | 0;
         dev.name         = obj["name"]        | "";
         dev.driver       = parseSensorDriver(obj["driver"].as<String>());
         dev.type         = parseDeviceType(obj["type"].as<String>());
