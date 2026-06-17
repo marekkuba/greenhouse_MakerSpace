@@ -54,8 +54,6 @@ void loadConfig() {
         dev.driver       = parseSensorDriver(obj["driver"].as<String>());
         dev.type         = parseDeviceType(obj["type"].as<String>());
         dev.pin          = obj["pin"]         | 0;
-        dev.minValue     = obj.containsKey("minValue")    ? obj["minValue"].as<float>()  : NAN;
-        dev.maxValue     = obj.containsKey("maxValue")    ? obj["maxValue"].as<float>()  : NAN;
         Serial.printf("[CONFIG] Loaded %s\n", dev.name.c_str());
 
         // Initialise actuators immediately

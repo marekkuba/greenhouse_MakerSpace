@@ -26,8 +26,6 @@ struct DeviceConfig {
   SensorDriver   driver;
   DeviceType type;
   uint8_t  pin;
-  float    minValue;
-  float    maxValue;
 };
 
 extern std::vector<DeviceConfig> devices;
