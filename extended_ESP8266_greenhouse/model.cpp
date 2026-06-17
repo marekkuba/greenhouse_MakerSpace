@@ -3,6 +3,7 @@
 #include "persistence.h"
 #include "control.h"
 #include "globals.h"
+#include "device_log.h"
 #include <Arduino.h>
 #include <WString.h>
 
@@ -29,7 +30,7 @@ bool parseGreenhouseJson(const char* json, size_t len, bool saveToDisk) {
 
     DeserializationError err = deserializeJson(doc, json, len);
     if (err) {
-        Serial.printf("[MODEL] JSON parse error: %s\n", err.c_str());
+        deviceLog("ERROR", "model.parse", String("Model JSON parse error: ") + err.c_str());
         return false;
     }
 
@@ -39,7 +40,7 @@ bool parseGreenhouseJson(const char* json, size_t len, bool saveToDisk) {
         if(saveModelRaw(json, len)) {
             Serial.println("[MODEL] New configuration saved to flash.");
         } else {
-            Serial.println("[MODEL] Error saving configuration!");
+            deviceLog("ERROR", "model.save", "Failed to save model to flash");
         }
     }
     // C. Updating Structs

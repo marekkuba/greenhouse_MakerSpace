@@ -2,9 +2,15 @@
 #include "config.h"
 #include "model.h"
 #include "globals.h"
+#include "device_log.h"
+#include <ArduinoJson.h>
 
 String getBaseTopic(String greenhouseIpAddress) {
   return "greenhouse/"+greenhouseIpAddress;
+}
+
+String getLogTopic(String greenhouseIpAddress) {
+  return getBaseTopic(greenhouseIpAddress)+"/log";
 }
 
 String getSubscriptionTopic(String greenhouseIpAddress){
@@ -113,4 +119,79 @@ void publishTelemetryJson(const String& jsonPayload, String greenhouseIpAddress)
     mqttClient.publish(topic.c_str(), 0, false, jsonPayload.c_str());
 
      Serial.printf("[MQTT] Published %d bytes to %s\n", jsonPayload.length(), topic.c_str());
+}
+
+// ── Remote logging ──────────────────────────────────────────────────────────
+//
+// Throttling strategy (keeps a stuck error path from flooding broker/heap):
+//   1. Dedupe: identical (level+code+msg) within DEDUP_WINDOW_MS is suppressed
+//      and merely counted; when it recurs after the window it is re-sent with a
+//      "rep" field carrying how many were suppressed.
+//   2. Token bucket: at most LOG_BURST distinct messages, refilling one every
+//      LOG_REFILL_MS (~10/min). Overflow is dropped (Serial still shows it).
+
+static uint32_t fnv1a(const char* s) {
+  uint32_t h = 2166136261u;
+  while (*s) { h ^= (uint8_t)*s++; h *= 16777619u; }
+  return h;
+}
+
+void deviceLog(const char* level, const char* code, const String& msg) {
+  // Always mirror locally so a connected serial monitor still sees everything.
+  Serial.printf("[%s] %s: %s\n", level, code, msg.c_str());
+
+  static const unsigned long DEDUP_WINDOW_MS = 30000;
+  static const uint8_t  LOG_BURST    = 5;
+  static const unsigned long LOG_REFILL_MS = 6000;
+
+  static uint32_t lastHash    = 0;
+  static unsigned long lastSentMs = 0;
+  static uint16_t suppressed  = 0;
+  static uint8_t  tokens      = LOG_BURST;
+  static unsigned long lastRefillMs = 0;
+
+  const unsigned long now = millis();
+  const uint32_t h = fnv1a(level) ^ fnv1a(code) ^ fnv1a(msg.c_str());
+
+  // 1. Suppress a repeat of the most recent message inside the dedupe window.
+  if (h == lastHash && (now - lastSentMs) < DEDUP_WINDOW_MS) {
+    if (suppressed < 0xFFFF) suppressed++;
+    return;
+  }
+
+  // 2. Refill + spend a token.
+  if (lastRefillMs == 0) lastRefillMs = now;
+  while ((now - lastRefillMs) >= LOG_REFILL_MS && tokens < LOG_BURST) {
+    tokens++;
+    lastRefillMs += LOG_REFILL_MS;
+  }
+  if (tokens == 0) return;  // rate-limited; dropped from the remote feed
+
+  // Can't publish if offline — remember the message so we don't immediately
+  // re-send it the instant MQTT reconnects.
+  if (!mqttClient.connected() || netConfig.device_ip.isEmpty()) {
+    lastHash = h;
+    lastSentMs = now;
+    suppressed = 0;
+    return;
+  }
+
+  tokens--;
+
+  static StaticJsonDocument<256> doc;
+  doc.clear();
+  doc["lvl"]  = level;
+  doc["code"] = code;
+  doc["msg"]  = msg;
+  if (h == lastHash && suppressed > 0) doc["rep"] = suppressed;
+  doc["up"]   = (uint32_t)(now / 1000);
+  doc["heap"] = ESP.getFreeHeap();
+
+  String out;
+  serializeJson(doc, out);
+  mqttClient.publish(getLogTopic(netConfig.device_ip).c_str(), 0, false, out.c_str());
+
+  lastHash = h;
+  lastSentMs = now;
+  suppressed = 0;
 }

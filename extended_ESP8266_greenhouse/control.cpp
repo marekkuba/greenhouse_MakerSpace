@@ -2,6 +2,7 @@
 #include "sensors_if.h" // Assumes SensorManager 'Sensors' is available here
 #include "actuators.h"  // Assumes writeActuator is available here
 #include "globals.h"    // Access to global 'bindings' vector and 'greenhouse'
+#include "device_log.h"
 
 // The global list of optimized bindings
 std::vector<RuntimeBinding> activeBindings;
@@ -57,8 +58,9 @@ void resolveBindings() {
                 }
             }
         } else {
-            Serial.printf("[WARN] Orphan Binding: Param '%s' (Z:%d P:%d) not found in Model.\n",
-                          b.paramName.c_str(), b.zoneId, b.flowerpotId);
+            deviceLog("WARN", "binding.orphan",
+                      "Orphan binding: param '" + b.paramName + "' (Z:" + b.zoneId +
+                      " P:" + b.flowerpotId + ") not found in model");
         }
     }
 

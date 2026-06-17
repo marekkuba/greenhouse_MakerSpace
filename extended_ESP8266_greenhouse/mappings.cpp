@@ -1,6 +1,7 @@
 #include "mappings.h"
 #include "sensor_types.h"
 #include "globals.h"
+#include "device_log.h"
 
 
 
@@ -19,14 +20,14 @@ bool loadMappings() {
     }
   File f = LittleFS.open("/mapping.json", "r");
   if (!f) {
-   Serial.println("[MAP] open failed");
+   deviceLog("ERROR", "mapping.open", "Could not open /mapping.json");
    return false;
    }
   DynamicJsonDocument doc(4096);
   auto err = deserializeJson(doc, f);
   f.close();
   if (err) {
-   Serial.printf("[MAP] parse error: %s\n", err.c_str());
+   deviceLog("ERROR", "mapping.parse", String("Mapping JSON parse error: ") + err.c_str());
     return false;
      }
 

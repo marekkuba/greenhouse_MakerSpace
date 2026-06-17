@@ -1,6 +1,7 @@
 #include "persistence.h"
 #include "mappings.h"
 #include "model.h"
+#include "device_log.h"
 
 bool saveModelRaw(const char* jsonString, size_t len) {
     // Caller (parseGreenhouseJson) already validated the JSON by parsing it successfully.
@@ -30,14 +31,15 @@ bool validateAndSave(const char* filename, const char* jsonString, size_t len) {
     DeserializationError error = deserializeJson(doc, jsonString, DeserializationOption::NestingLimit(10));
 
     if (error) {
-        Serial.printf("[FS] JSON Validation failed for %s: %s\n", filename, error.c_str());
+        deviceLog("ERROR", "fs.validate",
+                  String("JSON validation failed for ") + filename + ": " + error.c_str());
         return false;
     }
 
     // 2. Save to File
     File f = LittleFS.open(filename, "w");
     if (!f) {
-        Serial.printf("[FS] Failed to open %s for writing\n", filename);
+        deviceLog("ERROR", "fs.open", String("Failed to open ") + filename + " for writing");
         return false;
     }
 
@@ -45,7 +47,9 @@ bool validateAndSave(const char* filename, const char* jsonString, size_t len) {
     f.close();
 
     if (written != len) {
-        Serial.printf("[FS] Write mismatch for %s. Expected %d, wrote %d\n", filename, len, written);
+        deviceLog("ERROR", "fs.write",
+                  String("Write mismatch for ") + filename + " (expected " + (int)len +
+                  ", wrote " + (int)written + ")");
         return false;
     }
 
